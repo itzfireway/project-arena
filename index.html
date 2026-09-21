@@ -1260,6 +1260,7 @@ function updatePlayer(dt) {
   setFov(P.zoom, 1);
 }
 function makeNoise(r) {} // bots used to hear you; other players just listen to the audio
+function toast(text) { G.toast = text; G.toastT = 1.6; }
 function aimDir(yaw, pitch) { return new V3(-Math.sin(yaw) * Math.cos(pitch), Math.sin(pitch), -Math.cos(yaw) * Math.cos(pitch)); }
 function currentError() {
   const w = curW(); if (w.melee) return 0;
@@ -1407,6 +1408,7 @@ function updateDrops() {
     d.mesh.rotation.set(0, d.yaw, 0);
   }
 }
+const inSolid = (x, z) => BOXES.some(b => x > b.minX - .35 && x < b.maxX + .35 && z > b.minZ - .35 && z < b.maxZ + .35);
 const nearestDrop = (maxD = 2.4) => {
   let best = null, bd = maxD;
   for (const d of G.drops) { const dist = Math.hypot(d.x - P.pos.x, d.z - P.pos.z); if (dist < bd) { bd = dist; best = d; } }
@@ -1431,7 +1433,7 @@ function dropHeld() {
   delete P.slots[P.cur];
   const f = aimDir(P.yaw, 0);
   let x = P.pos.x + f.x * 1.2, z = P.pos.z + f.z * 1.2;
-  if (blocked[cellZ(z) * GW + cellX(x)]) { x = P.pos.x; z = P.pos.z; }
+  if (inSolid(x, z)) { x = P.pos.x; z = P.pos.z; } // do not shove it inside a wall
   dropWeaponAt(inst, x, z, P.yaw + rand(-.4, .4));
   const next = ['primary', 'secondary', 'melee'].find(sl => P.slots[sl]);
   P.cur = next; P.switchT = .45; P.reloadT = 0; P.autoReload = 0; P.spray = 0; P.recP = P.recY = 0; P.inspect = 0;
@@ -2378,24 +2380,39 @@ let last = performance.now();
 function frame(now) {
   requestAnimationFrame(frame);
   const dt = Math.min(.05, (now - last) / 1000); last = now;
-  if (G.phase === 'menu' || G.phase === 'lobby' || G.phase === 'over') menuCam(dt);
-  else if (!G.paused) update(dt);
-  else pausedTick(dt);
+  // Rendering happens after the simulation, so an exception in update() used to mean the screen
+  // simply stopped repainting -- the game looked frozen. Now a bad frame is reported once and
+  // skipped, and the next frame carries on.
+  try {
+    if (G.phase === 'menu' || G.phase === 'lobby' || G.phase === 'over') menuCam(dt);
+    else if (!G.paused) update(dt);
+    else pausedTick(dt);
+  } catch (e) {
+    if (!G.loggedErr) { G.loggedErr = true; console.error('frame error:', e); toast('Something went wrong — the match is still running'); }
+  }
   renderer.clear();
   renderer.render(scene, camera);
   if (inPlay() && P.alive) { renderer.clearDepth(); renderer.render(vmScene, vmCam); }
 }
-// Browsers stop requestAnimationFrame in a hidden tab. For the host that would freeze the round
-// clock for everybody, so while this tab is in the background a timer keeps the match ticking and
-// the snapshots flowing. Timers are throttled to about once a second there, which is coarse but
-// still means nobody is stuck waiting on a tabbed-out host.
+// Browsers stop requestAnimationFrame in a hidden tab and clamp setTimeout there to about once a
+// second. For the host that would stall the round clock and the snapshots for everyone else, so
+// the heartbeat comes from a worker instead: workers keep their timers running at full rate in a
+// backgrounded tab. Alt-tabbing now costs the host their own view, not everybody's match.
 let bgLast = performance.now();
-setInterval(() => {
+function bgTick() {
   const t = performance.now(), dt = Math.min(.5, (t - bgLast) / 1000); bgLast = t;
   if (!document.hidden) return;            // the render loop is already driving the match
   if (!ME || !inPlay()) return;
-  advanceMatch(dt); netTick();
-}, 100);
+  try { advanceMatch(dt); netTick(); } catch (e) {}
+}
+try {
+  const src = 'let h=null;onmessage=e=>{clearInterval(h);if(e.data)h=setInterval(()=>postMessage(0),e.data);};';
+  const worker = new Worker(URL.createObjectURL(new Blob([src], { type: 'application/javascript' })));
+  worker.onmessage = bgTick;
+  worker.postMessage(50);
+} catch (e) {
+  setInterval(bgTick, 100); // no workers available: fall back to the throttled timer
+}
 document.addEventListener('visibilitychange', () => { bgLast = last = performance.now(); });
 
 toMenu();
