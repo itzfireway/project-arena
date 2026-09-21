@@ -1177,6 +1177,12 @@ function spectateTarget() {
   if (!ok(G.specTarget)) G.specTarget = mates().find(ok) || null;
   return G.specTarget;
 }
+// puts the view behind your own eyes. Called from the update loop, but also on spawn and while
+// paused, so the camera is never left where the menu camera parked it.
+function placeCamera() {
+  camera.position.set(P.pos.x, P.pos.y + P.eye, P.pos.z);
+  camera.rotation.set(clamp(P.pitch + P.recP * .3 + P.punch, -1.55, 1.55), P.yaw + P.recY * .3, 0);
+}
 function updatePlayer(dt) {
   if (!P.alive) {
     P.deathT += dt;
@@ -1247,8 +1253,7 @@ function updatePlayer(dt) {
   P.hurtT = Math.max(0, P.hurtT - dt);
   // camera
   P.punch = Math.max(0, P.punch - dt * .25);
-  camera.position.set(P.pos.x, P.pos.y + P.eye, P.pos.z);
-  camera.rotation.set(clamp(P.pitch + P.recP * .3 + P.punch, -1.55, 1.55), P.yaw + P.recY * .3, 0);
+  placeCamera();
   // zoom / fov
   const zt = P.ads && P.switchT <= 0 && P.reloadT <= 0 ? (w.adsZoom || 1) : 1;
   P.zoom = lerp(P.zoom, zt, Math.min(1, dt * 16));
@@ -1336,7 +1341,7 @@ function fire() {
 function knife() {
   P.fireCd = .5; VM.swing = 1; nz({ dur: .15, f: 2500, to: 700, type: 'bandpass', q: 1, vol: .35 });
   const d = aimDir(P.yaw, P.pitch), hit = hitscan(camera.position.clone(), d, 2.6);
-  if (hit.bot) { const killed = hurtBot(hit.bot, Math.round(WEAPONS.knife[hit.zone === 'head' ? 'head' : 'body'] * stimMul(P)), hit.zone); hitMarker(killed ? 'kill' : ''); SFX.hit(); burst(camera.position.clone().addScaledVector(d, hit.t), 6, 0xff4b5c, 2, .09); }
+  if (hit.bot) { const killed = hurtBot(hit.bot, Math.round(WEAPONS.knife[hit.zone === 'head' ? 'head' : 'body']), hit.zone); hitMarker(killed ? 'kill' : ''); SFX.hit(); burst(camera.position.clone().addScaledVector(d, hit.t), 6, 0xff4b5c, 2, .09); }
   else if (hit.n && hit.t < 2.6) { nz({ dur: .05, f: 3500, type: 'bandpass', q: 5, vol: .3 }); }
 }
 function startReload() {
@@ -1633,12 +1638,6 @@ function showDmgDir(x, z) {
   H.dmgdir.appendChild(el);
   el.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 1100, easing: 'ease-in' }).onfinish = () => el.remove();
 }
-const SHIELD_SVG_OK = true;
-function pipsHTML(n, alive, cls) { let s = ''; for (let i = 0; i < n; i++) s += `<i class="pip${i < alive ? '' : ' down'}"></i>`; return s; }
-function abilHTML(el, n, max) {
-  const c = el.querySelector('.c'); let s = ''; for (let i = 0; i < max; i++) s += `<i class="${i < n ? '' : 'used'}"></i>`;
-  setHTML(c, s); el.classList.toggle('empty', n <= 0); el.classList.toggle('ready', n > 0);
-}
 // minimap
 const mmW = 176, mmH = 132, dpr = Math.min(2, devicePixelRatio || 1);
 H.mm.width = mmW * dpr; H.mm.height = mmH * dpr; H.mm.style.width = mmW + 'px'; H.mm.style.height = mmH + 'px';
@@ -1742,7 +1741,6 @@ function updateHUD(dt) {
   H.hurt.style.opacity = P.hurtT * 2;
   H.flash.style.opacity = Math.min(1, P.flash);
   H.low.style.opacity = P.alive && P.hp < 35 ? .6 + Math.sin(G.time * 5) * .2 : 0;
-  updateDmgDir(dt);
   drawMinimap();
 }
 
@@ -2015,14 +2013,7 @@ function resetRound() {
     pl.yaw = Math.atan2(-(0 - pl.pos.x), -(0 - pl.pos.z));
     if (pl.mesh) { pl.mesh.g.rotation.set(0, pl.yaw, 0); pl.mesh.g.position.set(pl.pos.x, 0, pl.pos.z); }
   }
-  P.pos.copy(ME.pos); P.yaw = ME.yaw; P.pitch = 0; P.vel.set(0, 0, 0);
-  P.alive = true; P.hp = 100; P.crouch = 0; P.flash = 0; P.hurtT = 0; P.deathT = 0; P.inspect = 0;
-  P.slots = { primary: settings.loadout === 'none' ? null : newInst(settings.loadout), secondary: newInst('pistol'), melee: newInst('knife') };
-  refill(P.slots.primary); refill(P.slots.secondary);
-  P.cur = P.slots.primary ? 'primary' : 'secondary';
-  P.reloadT = 0; P.switchT = 0; P.recP = P.recY = 0; P.dashT = 0; P.spray = 0;
-  canvas.classList.remove('dead');
-  VM.set(P.slots[P.cur].id);
+  resetLocalForRound();
 }
 // host only: drives the round clock and decides when a round is over
 function startRound() {
@@ -2091,6 +2082,7 @@ function advanceMatch(dt) {
 // runs while the pause menu is up: the world carries on, you just stop steering
 function pausedTick(dt) {
   if (!ME || !advanceMatch(dt)) return;
+  if (P.alive) { placeCamera(); setFov(P.zoom, 1); }
   updateRemotes(dt); updateBotBars(); updateDrops(); updateFX(dt);
   netTick(); updateHUD(dt);
 }
@@ -2251,9 +2243,12 @@ function beginMatch(isHost) {
   if (isHost) startRound();
   else { G.phase = 'freeze'; G.phaseT = FREEZE_TIME; resetRound(); }
   lock();
+  // pointer lock needs a click behind it; if it did not take, offer the click
+  setTimeout(() => { if (inPlay() && !document.pointerLockElement && !G.noLock && !G.paused) pause(); }, 400);
 }
-// the local half of a round reset: weapons, viewmodel, camera
+// the local half of a round reset: position, weapons, viewmodel, camera
 function resetLocalForRound() {
+  if (ME) { P.pos.copy(ME.pos); P.yaw = ME.yaw; }
   P.alive = true; P.hp = 100; P.vel.set(0, 0, 0); P.pitch = 0; P.crouch = 0; P.flash = 0; P.hurtT = 0; P.deathT = 0; P.inspect = 0;
   P.slots = { primary: settings.loadout === 'none' ? null : newInst(settings.loadout), secondary: newInst('pistol'), melee: newInst('knife') };
   P.cur = P.slots.primary ? 'primary' : 'secondary';
@@ -2261,6 +2256,7 @@ function resetLocalForRound() {
   canvas.classList.remove('dead');
   clearRoundFX();
   VM.set(P.slots[P.cur].id);
+  P.zoom = 1; setFov(1, 1); placeCamera();
 }
 function toMenu() {
   G.phase = 'menu'; G.paused = false;
