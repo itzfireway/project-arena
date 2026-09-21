@@ -8,7 +8,7 @@ viewmodel — with the bots and the spike replaced by real players over the netw
 
 ## Playing
 
-1. Open the page and pick a name, a mode (1v1 or 2v2) and a rifle.
+1. Open the page and pick a name and a mode (1v1 or 2v2).
 2. **CREATE MATCH** opens a room and gives you an invite link.
 3. Send that link to whoever is playing. They open it and press **JOIN**.
 4. When the lobby is full, the host presses **START MATCH**.
@@ -16,11 +16,19 @@ viewmodel — with the bots and the spike replaced by real players over the netw
 First side to 7 rounds wins. A round ends when one side is wiped out, or the
 90-second clock runs out.
 
+## Guns
+
+There is no loadout to choose before the match and nothing to pay for. Press
+**B** for the armory and take whatever you want: every weapon is free. It opens
+during the twelve seconds before a round, between rounds, and any time you are
+waiting to respawn — not while you are alive and the round is live. What you
+pick stays yours for the rest of the match and is re-issued every round.
+
 ## Controls
 
 WASD move · Shift walk · C crouch · Space jump · LMB fire · RMB aim · R reload
-· 1/2/3 weapons · G drop or pick up a gun · Y inspect the knife · Tab scoreboard
-· Esc pause. Everything is rebindable under CONTROLS.
+· 1/2/3 weapons · G drop or pick up a gun · B armory · Y inspect the knife
+· Tab scoreboard · Esc pause. Everything is rebindable under CONTROLS.
 
 ## How the networking works
 

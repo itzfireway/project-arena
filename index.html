@@ -165,6 +165,23 @@
 
   /* ---------- Menus ---------- */
   .overlay{position:absolute;inset:0;display:flex;}
+  #shop{background:rgba(8,11,15,.78);align-items:center;justify-content:center;padding:16px;box-sizing:border-box;overflow-y:auto;}
+  .shopwrap{width:min(940px,100%);display:flex;flex-direction:column;gap:14px;}
+  .shophead{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;}
+  .shophead h2{font-family:var(--display);margin:0;font-size:28px;letter-spacing:.14em;}
+  #shopNote{font-family:var(--display);font-size:18px;color:var(--gold);letter-spacing:.1em;}
+  .shopgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;}
+  .shopcol{display:flex;flex-direction:column;gap:6px;}
+  .shopcol > .lbl{font-family:var(--display);font-size:13px;letter-spacing:.16em;color:var(--mute);}
+  .item{background:rgba(255,255,255,.05);border:1px solid var(--line);color:var(--ink);text-align:left;padding:12px;display:flex;flex-direction:column;gap:4px;font-family:var(--body);}
+  .item:hover:not(:disabled){border-color:var(--ink);background:rgba(255,255,255,.09);}
+  .item:disabled{opacity:.38;cursor:not-allowed;}
+  .item.owned{border-color:var(--teal);box-shadow:inset 3px 0 0 var(--teal);}
+  .item .nm{font-family:var(--display);font-weight:700;font-size:16px;letter-spacing:.04em;display:flex;justify-content:space-between;gap:8px;}
+  .item .nm span{color:var(--gold);font-variant-numeric:tabular-nums;}
+  .item .st{font-size:13px;color:var(--mute);}
+  .shopfoot{color:var(--mute);font-size:14px;}
+  .shopfoot kbd{font-family:var(--display);color:var(--ink);border:1px solid var(--line);padding:1px 6px;}
   [hidden]{display:none !important;}
   #menu{background:linear-gradient(90deg,rgba(9,12,17,.94) 0%,rgba(9,12,17,.82) 38%,rgba(9,12,17,.1) 75%);align-items:center;overflow-y:auto;}
   .menucol{width:min(460px,100%);padding:40px 16px 40px max(16px,6vw);box-sizing:border-box;display:flex;flex-direction:column;gap:26px;}
@@ -358,12 +375,6 @@
           </div>
         </div>
         <div class="field">
-          <span class="lbl" id="loadLbl">Your rifle</span>
-          <div class="seg" id="loadSeg" role="group" aria-labelledby="loadLbl">
-            <button data-v="viper">SMG</button><button data-v="tempest">VANDAL</button><button data-v="wraith">PHANTOM</button><button data-v="longshot">SNIPER</button><button data-v="none">PISTOL ONLY</button>
-          </div>
-        </div>
-        <div class="field">
           <label for="sens">Mouse sensitivity</label>
           <div class="range"><input type="range" id="sens" min="0.1" max="3" step="0.05" value="1"><output id="sensOut">1.00</output></div>
         </div>
@@ -436,6 +447,14 @@
     </div>
   </div>
 
+  <div class="overlay" id="shop" hidden>
+    <div class="shopwrap">
+      <div class="shophead"><h2>ARMORY</h2><div id="shopNote">EVERYTHING FREE</div></div>
+      <div class="shopgrid" id="shopGrid"></div>
+      <div class="shopfoot">Click to equip &mdash; it is yours for the rest of the match. <kbd>B</kbd> or <kbd>Esc</kbd> to close.</div>
+    </div>
+  </div>
+
   <div class="overlay" id="over" hidden>
     <div class="card">
       <h2 id="overTitle">VICTORY</h2>
@@ -469,8 +488,8 @@ function setHTML(el, v) { if (txtCache.get(el) !== v) { txtCache.set(el, v); el.
 const ACTIONS = [
   ['fwd', 'Move forward', 'KeyW'], ['back', 'Move back', 'KeyS'], ['left', 'Strafe left', 'KeyA'], ['right', 'Strafe right', 'KeyD'],
   ['walk', 'Walk (silent)', 'ShiftLeft'], ['crouch', 'Crouch', 'KeyC'], ['jump', 'Jump', 'Space'], ['reload', 'Reload', 'KeyR'],
-  ['primary', 'Primary weapon', 'Digit1'], ['secondary', 'Sidearm', 'Digit2'], ['melee', 'Butterfly knife', 'Digit3'],
-  ['drop', 'Drop / pick up gun', 'KeyG'], ['inspect', 'Inspect knife', 'KeyY'],
+  ['primary', 'Primary weapon', 'Digit1'], ['secondary', 'Sidearm', 'Digit2'], ['melee', 'Karambit', 'Digit3'],
+  ['drop', 'Drop / pick up gun', 'KeyG'], ['inspect', 'Inspect knife', 'KeyY'], ['buy', 'Weapon shop', 'KeyB'],
   ['score', 'Scoreboard (hold)', 'Tab'],
 ];
 const DEFAULT_BINDS = Object.fromEntries(ACTIONS.map(a => [a[0], a[2]]));
@@ -478,7 +497,7 @@ const DEFAULT_BINDS = Object.fromEntries(ACTIONS.map(a => [a[0], a[2]]));
 const BUILD = { date: '21 SEP 2026', by: 'ITZFIREWAY' };
 const ROOM_HINT = 'Share your link and play from anywhere.';
 const XH_DEFAULT = { color: '#8dffd8', len: 6, th: 2, gap: 3, dot: true, dotSize: 2, lines: true, outline: true, dynamic: true, alpha: 1 };
-const settings = { name: '', mode: 'duel', loadout: 'tempest', sens: 1 };
+const settings = { name: '', mode: 'duel', loadout: 'tempest', sidearm: 'pistol', sens: 1 };
 if (!settings.name) settings.name = 'Player' + (100 + Math.floor(Math.random() * 900));
 try { Object.assign(settings, JSON.parse(localStorage.getItem('project-arena') || '{}')); } catch (e) {}
 delete settings.map; delete settings.diff; delete settings.bots; delete settings.mates; delete settings.agent;
@@ -501,7 +520,7 @@ function actionOf(code) { for (const a in settings.binds) if (settings.binds[a] 
 /* ================= weapons ================= */
 const WEAPONS = {
   // pen: damage kept after punching through one wooden wall or crate (0 = can't)
-  knife:    { name: 'Butterfly Knife', slot: 'melee', cost: 0, melee: true, rate: 2.2, head: 100, body: 50, leg: 50 },
+  knife:    { name: 'Karambit', slot: 'melee', cost: 0, melee: true, rate: 2.2, head: 100, body: 50, leg: 50, speed: 1.2 },
   pistol:   { name: 'P-9 Sidearm', slot: 'secondary', cost: 0, auto: false, rate: 6.75, mag: 12, reserve: 36, reload: 1.75, head: 78, body: 26, leg: 22, fall: [30, .85], spread: .004, move: .03, air: .1, kick: .012, maxRec: .06, sway: .002, adsZoom: 1, snd: 'pistol' , pen: 0.45 },
   magnum:   { name: 'Magnum', slot: 'secondary', cost: 800, auto: false, rate: 4, mag: 6, reserve: 24, reload: 2.25, head: 159, body: 55, leg: 46, fall: [30, .85], spread: .003, move: .05, air: .12, kick: .04, maxRec: .1, sway: .004, adsZoom: 1, snd: 'magnum', punch: .025 , pen: 0.6 },
   viper:    { name: 'Viper SMG', slot: 'primary', cost: 1600, auto: true, rate: 13.3, mag: 30, reserve: 90, reload: 2.25, head: 78, body: 26, leg: 22, fall: [20, .85], spread: .006, move: .012, air: .06, kick: .005, maxRec: .05, sway: .003, bloom: .0012, first: 2, swayStart: 6, adsZoom: 1.15, adsMul: .75, snd: 'smg' , pen: 0.45 },
@@ -510,14 +529,6 @@ const WEAPONS = {
   longshot: { name: 'Longshot', slot: 'primary', cost: 4700, auto: false, rate: .75, mag: 5, reserve: 10, reload: 3.7, head: 255, body: 150, leg: 127, fall: null, spread: .035, move: .09, air: .2, kick: .05, maxRec: .1, sway: 0, adsZoom: 3.5, scope: true, snd: 'sniper', punch: .04, speed: .9 , pen: 0.8 },
 };
 WEAPONS.bladestorm = { name: 'Blade Storm', slot: 'ult', cost: 0, auto: false, rate: 3.4, mag: 5, reserve: 0, reload: 1, head: 150, body: 50, leg: 50, fall: null, spread: .0012, move: .004, air: .01, kick: .006, maxRec: .02, sway: 0, adsZoom: 1, snd: 'blade', pen: 0, ult: true };
-const SHIELDS = { light: { name: 'Light Shield', cost: 400, v: 25 }, heavy: { name: 'Heavy Shield', cost: 1000, v: 50 } };
-const SHOP = [
-  { cat: 'Sidearms', items: ['pistol', 'magnum'] },
-  { cat: 'SMG', items: ['viper'] },
-  { cat: 'Rifles', items: ['tempest', 'wraith'] },
-  { cat: 'Sniper', items: ['longshot'] },
-  { cat: 'Shields', items: ['light', 'heavy'] },
-];
 
 /* ================= renderer / scenes ================= */
 const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
@@ -1449,64 +1460,223 @@ function dropOrPickup() {
 
 /* ================= viewmodel ================= */
 const vmMat = {
-  metal: new THREE.MeshStandardMaterial({ color: 0x2c3037, roughness: .42, metalness: .6 }),
-  dark: new THREE.MeshStandardMaterial({ color: 0x15171b, roughness: .6, metalness: .3 }),
+  metal: new THREE.MeshStandardMaterial({ color: 0x353b44, roughness: .4, metalness: .35 }),
+  dark: new THREE.MeshStandardMaterial({ color: 0x191c21, roughness: .6, metalness: .15 }),
   accent: new THREE.MeshStandardMaterial({ color: 0x3fb9a6, roughness: .4, metalness: .3, emissive: 0x0f3a34 }),
   sleeve: new THREE.MeshStandardMaterial({ color: 0x353b4c, roughness: .85 }),
-  glove: new THREE.MeshStandardMaterial({ color: 0x1d1f24, roughness: .7 }),
-  blade: new THREE.MeshStandardMaterial({ color: 0xcfd6dc, roughness: .18, metalness: .9 }),
-  edge: new THREE.MeshStandardMaterial({ color: 0xf2f7fa, roughness: .08, metalness: 1, emissive: 0x1b2a33 }),
+  glove: new THREE.MeshStandardMaterial({ color: 0x2b3038, roughness: .7 }),   // lighter than the grips, or the hand vanishes into whatever it is holding
+  blade: new THREE.MeshStandardMaterial({ color: 0xd2dae1, roughness: .28, metalness: .3 }),
+  edge: new THREE.MeshStandardMaterial({ color: 0xf4f9fc, roughness: .12, metalness: .35, emissive: 0x1b2a33 }),
   brass: new THREE.MeshStandardMaterial({ color: 0xc79a4b, roughness: .3, metalness: .9 }),
 };
 function vb(g, mat, w, h, d, x, y, z, rx = 0, ry = 0, rz = 0) { const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat); m.position.set(x, y, z); m.rotation.set(rx, ry, rz); g.add(m); return m; }
 function vc(g, mat, r, len, x, y, z) { const m = new THREE.Mesh(new THREE.CylinderGeometry(r, r, len, 14), mat); m.rotation.x = Math.PI / 2; m.position.set(x, y, z); g.add(m); return m; }
+// ---- shared viewmodel parts -------------------------------------------------
+// Every gun is built from the same vocabulary -- receiver, handguard, trigger group, iron sights and the
+// teal rail strip -- so the set reads as one armoury rather than seven unrelated piles of boxes.
+function vSerr(g, M, n, w, h, y, z, step) { for (let i = 0; i < n; i++) vb(g, M.dark, w, h, .005, 0, y, z + i * step); }
+function vSights(g, M, y, zf, zr, fBase) {
+  // fBase is the top of whatever the front post stands on -- a handguard sits well below the rear
+  // sight, and a post drawn at the sight line alone just hangs in the air ahead of the gun.
+  const base = fBase === undefined ? y + .003 : fBase, h = y + .022 - base;
+  vb(g, M.metal, .008, h, .01, 0, base + h / 2, zf);                                  // front post and its riser
+  vb(g, M.dark, .028, .006, .011, 0, y + .003, zr);                                   // rear base
+  for (const s of [-1, 1]) vb(g, M.dark, .006, .015, .011, s * .011, y + .011, zr);   // notch wings
+}
+// the grip and magazine rake backwards, so each is built in its own tilted group
+function vGrip(g, M, x, y, z, h, tilt) {
+  const p = new THREE.Group(); p.position.set(x, y, z); p.rotation.x = tilt; g.add(p);
+  vb(p, M.dark, .038, h, .056, 0, 0, 0);
+  for (let i = 0; i < 3; i++) vb(p, M.metal, .041, .005, .048, 0, h * .22 - i * .024, .004);  // checkering
+  return p;
+}
+function vMag(g, M, x, y, z, w, h, d, tilt) {
+  const p = new THREE.Group(); p.position.set(x, y, z); p.rotation.x = tilt; g.add(p);
+  vb(p, M.dark, w, h, d, 0, 0, 0);
+  vb(p, M.metal, w + .004, .008, d + .004, 0, -h / 2 + .004, 0);   // floorplate
+  vb(p, M.accent, w + .002, .006, .012, 0, h * .18, -d / 2);       // witness window
+  return p;
+}
+function vGuard(g, M, z, d, y) {
+  vb(g, M.metal, .03, .006, d, 0, y - .034, z);                          // bottom bar
+  vb(g, M.metal, .03, .034, .007, 0, y - .017, z - d / 2 + .004);        // front post
+  vb(g, M.metal, .03, .034, .007, 0, y - .017, z + d / 2 - .004);        // rear post
+  vb(g, M.dark, .01, .022, .008, 0, y - .014, z + .006);                 // trigger
+}
+// at rest the knife is rolled most of a quarter turn: blade downrange, flat face up into the viewmodel sun
+const KN_REST = -Math.PI / 2 + .28;
+// A hand wrapped round the grip, rather than a mitt floating near it. Anchored at the knife's own pivot
+// and rolled the same way, so its local +y runs along the grip and the fingers stack along the handle.
+function vFist(g, M, at, roll) {
+  const h = new THREE.Group(); h.position.copy(at); h.rotation.x = roll; g.add(h);
+  const f = new THREE.Group(); h.add(f);                                                    // slides down to the ring to twirl
+  vb(f, M.glove, .056, .082, .046, 0, .07, -.026);                                          // palm, under the grip
+  const cl = new THREE.Group(); cl.position.set(0, .07, -.012); f.add(cl);                  // the fingers, which open out
+  for (let i = 0; i < 4; i++) vb(cl, M.glove, .05, .015, .038, -.002, .032 - i * .021, .03);
+  vb(cl, M.glove, .019, .052, .036, .026, -.012, .012, 0, 0, .22);                          // thumb along the grip
+  return { f, cl };
+}
 function buildGun(id) {
-  const g = new THREE.Group(), M = vmMat; let mz = -.5, rifle = true, bfly = null;
+  const g = new THREE.Group(), M = vmMat; let mz = -.5, rifle = true, hz = -.42, kara = null;
   switch (id) {
-    case 'pistol': vb(g, M.metal, .045, .06, .24, 0, .03, -.1); vb(g, M.dark, .04, .12, .06, 0, -.05, 0, .25); vb(g, M.accent, .047, .012, .1, 0, .064, -.12); mz = -.23; rifle = false; break;
-    case 'magnum': vb(g, M.metal, .05, .065, .16, 0, .03, -.04); vc(g, M.dark, .038, .08, 0, .02, -.06); vc(g, M.metal, .018, .22, 0, .045, -.22); vb(g, M.dark, .042, .13, .06, 0, -.05, .04, .3); vb(g, M.accent, .052, .01, .06, 0, .066, -.02); mz = -.34; rifle = false; break;
-    case 'viper': vb(g, M.metal, .06, .09, .36, 0, 0, -.12); vb(g, M.dark, .035, .17, .05, 0, -.11, -.16); vc(g, M.dark, .015, .12, 0, .01, -.36); vb(g, M.dark, .04, .11, .05, 0, -.08, .02, .3); vb(g, M.dark, .03, .05, .16, 0, 0, .12); vb(g, M.accent, .062, .014, .2, 0, .05, -.12); mz = -.43; break;
-    case 'tempest': vb(g, M.metal, .065, .1, .48, 0, 0, -.17); vb(g, M.dark, .06, .075, .28, 0, -.005, -.5); vb(g, M.dark, .04, .19, .07, 0, -.13, -.2, -.25); vb(g, M.dark, .05, .1, .22, 0, -.01, .17); vb(g, M.dark, .04, .11, .05, 0, -.09, -.02, .3); vc(g, M.metal, .012, .16, 0, .005, -.72); vb(g, M.accent, .03, .02, .32, 0, .06, -.22); mz = -.8; break;
-    case 'wraith': vb(g, M.metal, .065, .1, .5, 0, 0, -.17); vb(g, M.dark, .058, .072, .24, 0, -.005, -.5); vb(g, M.dark, .038, .17, .06, 0, -.12, -.2); vb(g, M.dark, .05, .1, .22, 0, -.01, .17); vb(g, M.dark, .04, .11, .05, 0, -.09, -.02, .3); vc(g, M.dark, .024, .24, 0, .005, -.74); vb(g, M.accent, .067, .014, .12, 0, .045, -.05); mz = -.87; break;
-    case 'longshot': vb(g, M.metal, .07, .1, .6, 0, 0, -.2); vc(g, M.metal, .017, .44, 0, .01, -.7); vc(g, M.dark, .038, .3, 0, .1, -.16); vb(g, M.dark, .02, .05, .03, 0, .06, -.16); vb(g, M.dark, .05, .12, .26, 0, -.02, .2); vb(g, M.dark, .04, .08, .07, 0, -.09, -.18); vb(g, M.accent, .072, .014, .14, 0, .04, -.38); mz = -.93; break;
-    case 'bladestorm':
-      for (let i = -1; i <= 1; i++) { const k = new THREE.Group(); k.position.set(i * .035, 0, 0); k.rotation.set(0, 0, i * .35); vb(k, M.dark, .026, .03, .08, 0, 0, 0); vb(k, M.blade, .006, .036, .22, 0, .004, -.15); vb(k, M.accent, .03, .012, .012, 0, 0, -.045); g.add(k); }
-      mz = -.3; rifle = false; break;
-    case 'knife': {
-      // A balisong. The blade lies flat (wide in x, thin in y) so its face catches the viewmodel sun
-      // instead of showing the camera an unlit edge, and the handles sandwich it from above and below
-      // on pins that run along x -- the same axis they swing on.
-      const kn = new THREE.Group(); kn.scale.setScalar(.92); g.add(kn);
-      // blade: ricasso, main bevel, angled tip, with a bright strip along the sharpened edge
-      vb(kn, M.blade, .044, .009, .07, 0, 0, -.07);
-      vb(kn, M.blade, .05, .008, .17, 0, 0, -.185);
-      vb(kn, M.edge, .014, .0085, .17, .026, 0, -.185);
-      vb(kn, M.blade, .036, .0075, .06, -.004, 0, -.295, 0, .22, 0);
-      vb(kn, M.edge, .012, .008, .055, .019, 0, -.293, 0, .22, 0);
-      // tang and the two pivot pins the handles turn on
-      vb(kn, M.metal, .05, .022, .055, 0, 0, -.022);
-      vc(kn, M.brass, .008, .062, 0, .016, -.03).rotation.set(0, 0, Math.PI / 2);
-      vc(kn, M.brass, .008, .062, 0, -.016, -.03).rotation.set(0, 0, Math.PI / 2);
-      const hs = [];
-      // top handle folds over the blade, bottom handle folds under it
-      for (const sy of [1, -1]) {
-        const pv = new THREE.Group(); pv.position.set(0, sy * .016, -.03); kn.add(pv); hs.push(pv);
-        // channel rails, so the blade shows through the handle when it is closed
-        for (const sx of [-1, 1]) vb(pv, M.dark, .013, .015, .195, sx * .021, 0, .105);
-        vb(pv, M.dark, .055, .012, .045, 0, 0, .185);                 // butt
-        vb(pv, M.accent, .057, .006, .05, 0, sy * .008, .16);          // inlay
-        vb(pv, M.metal, .048, .01, .03, 0, 0, .022);                   // spacer at the pivot
-        if (sy > 0) vb(pv, M.brass, .01, .012, .05, .026, .012, .05);  // latch, on the top handle only
+    case 'pistol': {
+      vb(g, M.metal, .042, .052, .23, 0, .034, -.09);                    // slide
+      vb(g, M.dark, .044, .008, .075, 0, .059, -.125);                   // slide top flat
+      vSerr(g, M, 5, .044, .03, .034, .002, .015);                       // cocking serrations
+      vb(g, M.dark, .013, .024, .055, .022, .04, -.05);                  // ejection port
+      vb(g, M.metal, .038, .034, .2, 0, -.002, -.085);                   // frame and dust cover
+      vc(g, M.dark, .0085, .05, 0, .034, -.212);                         // crowned muzzle
+      vGuard(g, M, .012, .04, -.002);
+      vGrip(g, M, 0, -.072, .02, .115, .26);
+      vb(g, M.accent, .046, .008, .05, 0, .064, -.08);                   // rail strip
+      vSights(g, M, .058, -.195, -.005);
+      mz = -.23; rifle = false; break;
+    }
+    case 'magnum': {
+      vb(g, M.metal, .032, .05, .13, 0, .03, -.05);                      // frame, narrower than the cylinder so the cylinder shows either side
+      vb(g, M.metal, .046, .013, .17, 0, .054, -.095);                   // top strap
+      vc(g, M.metal, .0365, .085, 0, .024, -.055);                       // cylinder, lighter than the frame so its round face reads
+      for (let i = 0; i < 6; i++) { const a = i * Math.PI / 3; vb(g, M.dark, .011, .011, .09, Math.cos(a) * .032, .024 + Math.sin(a) * .032, -.055); }  // flutes
+      vc(g, M.metal, .015, .24, 0, .038, -.21);                          // barrel
+      vb(g, M.metal, .026, .022, .2, 0, .018, -.2);                      // ejector rod shroud
+      vb(g, M.dark, .011, .022, .024, 0, .061, -.018);                   // hammer spur
+      vb(g, M.metal, .032, .055, .026, 0, -.012, .022);                  // backstrap into the grip
+      vGuard(g, M, .022, .042, .01);
+      vGrip(g, M, 0, -.05, .032, .13, .34);
+      vSights(g, M, .058, -.29, -.02, .05);
+      mz = -.34; rifle = false; break;
+    }
+    case 'viper': {
+      vb(g, M.metal, .056, .082, .34, 0, .004, -.11);                    // receiver
+      vb(g, M.dark, .06, .022, .3, 0, .05, -.1);                         // top cover
+      vb(g, M.dark, .05, .054, .17, 0, -.008, -.31);                     // handguard
+      for (let i = 0; i < 3; i++) for (const s of [-1, 1]) vb(g, M.metal, .006, .018, .02, s * .027, -.008, -.27 - i * .035);  // cooling slots
+      vc(g, M.dark, .013, .1, 0, .006, -.4);                             // barrel
+      vc(g, M.metal, .018, .03, 0, .006, -.432);                         // flash hider
+      vb(g, M.dark, .03, .042, .08, 0, .004, .08);                       // buffer housing
+      vb(g, M.metal, .013, .05, .15, 0, .012, .145);                     // folding stock strut
+      vb(g, M.dark, .05, .056, .022, 0, .002, .222);                     // stock pad
+      vMag(g, M, 0, -.1, -.12, .034, .15, .062, -.12);
+      vGuard(g, M, .015, .042, -.02);
+      vGrip(g, M, 0, -.082, .022, .12, .3);
+      vb(g, M.accent, .058, .008, .16, 0, .063, -.13);                   // rail strip
+      vb(g, M.dark, .015, .013, .032, .032, .03, -.02);                  // charging handle
+      vSights(g, M, .062, -.33, -.02, .019);
+      mz = -.43; hz = -.33; break;
+    }
+    case 'tempest': {
+      vb(g, M.metal, .058, .09, .42, 0, 0, -.16);                        // receiver
+      vb(g, M.dark, .062, .024, .5, 0, .056, -.22);                      // top rail
+      vb(g, M.dark, .05, .058, .26, 0, -.004, -.52);                     // handguard
+      for (let i = 0; i < 4; i++) for (const s of [-1, 1]) vb(g, M.metal, .006, .02, .022, s * .027, -.004, -.44 - i * .038);  // vents
+      vb(g, M.metal, .03, .034, .05, 0, .01, -.665);                     // gas block
+      vc(g, M.dark, .011, .11, 0, .006, -.715);                          // barrel
+      vc(g, M.metal, .017, .035, 0, .006, -.783);                        // muzzle brake
+      vb(g, M.dark, .048, .07, .2, 0, -.005, .15);                       // stock
+      vb(g, M.dark, .05, .03, .05, 0, .042, .1);                         // cheek rest
+      vb(g, M.metal, .052, .062, .022, 0, -.01, .245);                   // butt pad
+      vMag(g, M, 0, -.12, -.12, .036, .17, .07, -.16);
+      vGuard(g, M, -.02, .044, -.025);
+      vGrip(g, M, 0, -.088, .02, .125, .3);
+      vb(g, M.accent, .03, .012, .34, 0, .07, -.25);                     // rail strip
+      vb(g, M.dark, .016, .014, .036, .032, .03, -.02);                  // charging handle
+      vSights(g, M, .07, -.6, -.02, .025);
+      mz = -.8; hz = -.52; break;
+    }
+    case 'wraith': {
+      vb(g, M.metal, .066, .1, .46, 0, 0, -.17);                         // receiver
+      vb(g, M.dark, .07, .026, .52, 0, .062, -.24);                      // top rail
+      vb(g, M.dark, .058, .062, .3, 0, -.004, -.56);                     // handguard
+      for (let i = 0; i < 5; i++) for (const s of [-1, 1]) vb(g, M.metal, .007, .024, .02, s * .031, -.004, -.45 - i * .04);  // vents
+      vc(g, M.dark, .015, .15, 0, .006, -.765);                          // heavy barrel
+      vc(g, M.metal, .023, .04, 0, .006, -.85);                          // brake
+      vb(g, M.dark, .054, .078, .22, 0, -.006, .16);                     // stock
+      vb(g, M.metal, .058, .068, .024, 0, -.01, .268);                   // butt pad
+      for (const s of [-1, 1]) vb(g, M.dark, .008, .04, .09, s * .023, -.046, -.6, .35);  // bipod, folded back
+      vMag(g, M, 0, -.135, -.1, .044, .19, .085, -.1);
+      vGuard(g, M, -.02, .046, -.03);
+      vGrip(g, M, 0, -.095, .025, .13, .3);
+      vb(g, M.accent, .034, .012, .36, 0, .077, -.26);                   // rail strip
+      vb(g, M.dark, .018, .016, .04, .036, .034, -.02);                  // charging handle
+      vSights(g, M, .078, -.66, -.02, .027);
+      mz = -.87; hz = -.56; break;
+    }
+    case 'longshot': {
+      vb(g, M.metal, .052, .085, .44, 0, 0, -.18);                       // receiver
+      for (const z of [-.26, -.07]) vb(g, M.metal, .032, .03, .024, 0, .055, z);    // scope rings
+      vc(g, M.dark, .028, .3, 0, .096, -.17);                            // scope tube
+      vc(g, M.metal, .034, .05, 0, .096, -.3);                           // objective bell
+      vc(g, M.accent, .026, .006, 0, .096, -.324);                       // objective lens
+      vc(g, M.metal, .032, .04, 0, .096, -.035);                         // eyepiece
+      vb(g, M.dark, .021, .022, .03, 0, .126, -.14);                     // elevation turret
+      vb(g, M.dark, .03, .021, .022, .026, .096, -.14);                  // windage turret
+      vb(g, M.metal, .03, .03, .06, 0, .004, -.32);                      // barrel shank
+      vc(g, M.dark, .013, .56, 0, .004, -.6);                            // barrel
+      vc(g, M.metal, .019, .05, 0, .004, -.9);                           // brake
+      vb(g, M.dark, .015, .015, .05, .03, .022, -.02);                   // bolt body
+      vb(g, M.metal, .012, .042, .012, .04, .002, -.006, 0, 0, .4);      // bolt handle
+      vb(g, M.dark, .05, .075, .24, 0, -.01, .16);                       // stock
+      vb(g, M.dark, .052, .034, .06, 0, .038, .1);                       // cheek piece
+      vb(g, M.metal, .054, .072, .022, 0, -.014, .285);                  // butt pad
+      vMag(g, M, 0, -.105, -.1, .03, .11, .075, -.06);
+      vGuard(g, M, -.02, .044, -.03);
+      vGrip(g, M, 0, -.085, .02, .12, .32);
+      vb(g, M.accent, .03, .01, .1, 0, .062, -.06);                      // rail strip
+      mz = -.93; hz = -.5; break;
+    }
+    case 'bladestorm': {
+      for (let i = -1; i <= 1; i++) {
+        const k = new THREE.Group(); k.position.set(i * .038, i * .004, 0); k.rotation.set(0, 0, i * .32); g.add(k);
+        vb(k, M.dark, .024, .028, .085, 0, 0, .012);                     // handle
+        for (let j = 0; j < 3; j++) vb(k, M.brass, .026, .007, .012, 0, 0, .032 - j * .019);  // cord wrap
+        vb(k, M.metal, .034, .013, .012, 0, 0, -.036);                   // guard
+        vb(k, M.blade, .007, .03, .19, 0, .002, -.14);                   // blade
+        vb(k, M.edge, .008, .009, .19, 0, .015, -.14);                   // bright spine
+        vb(k, M.blade, .006, .018, .05, 0, -.002, -.258);                // tapered tip
       }
-      bfly = { kn, hs }; mz = -.36; rifle = false; break;
+      mz = -.3; rifle = false; break;
+    }
+    case 'knife': {
+      // A karambit. The claw is an arc of tapering segments built in the knife's own x-y plane, with the
+      // bright strip on the concave side because that is the edge a karambit is actually sharpened on.
+      // The finger ring sits at the group's origin, so the inspect twirl spins about it the way the real
+      // thing rides the index finger. At rest the group is rolled so the flat face takes the viewmodel sun.
+      const kn = new THREE.Group(); kn.scale.setScalar(.6); kn.position.set(0, -.084, .03); g.add(kn);
+      // finger ring, then the grip running up out of it
+      kn.add(new THREE.Mesh(new THREE.TorusGeometry(.031, .0075, 8, 22), M.metal));
+      vb(kn, M.metal, .016, .05, .016, 0, .042, 0);                  // ring post into the grip
+      vb(kn, M.dark, .031, .108, .026, 0, .116, 0);                  // grip body
+      vb(kn, M.accent, .033, .011, .028, 0, .078, 0);                // inlay
+      for (let i = 0; i < 3; i++) vb(kn, M.dark, .013, .017, .031, -.019, .086 + i * .029, 0);   // finger grooves
+      vb(kn, M.metal, .034, .03, .024, 0, .179, 0);                  // bolster into the ricasso
+      for (let i = 0; i < 4; i++) vb(kn, M.metal, .008, .005, .027, .016, .168 + i * .009, 0);   // jimping on the spine
+      // the claw: a tapering arc swept about a centre one radius to the left of the ricasso, extruded flat.
+      // `wid` runs the width to almost nothing by the end of the sweep, which is what puts a real point on
+      // the tip -- a chain of boxes can only ever end in a blunt square.
+      const Rc = .145, TH = 1.85, base = .194, N = 16;
+      const wid = u => Math.max(.0016, .052 * Math.sqrt(1 - Math.pow(u, 1.7)));
+      const arc = (rOf, from, to) => {
+        const p = [];
+        for (let i = 0; i <= N; i++) { const u = from + (to - from) * i / N, a = TH * u; p.push(new THREE.Vector2(-Rc + rOf(u) * Math.cos(a), base + rOf(u) * Math.sin(a))); }
+        return p;
+      };
+      const flat = (sh, d) => { const m = new THREE.Mesh(new THREE.ExtrudeGeometry(sh, { depth: d, bevelEnabled: false }), null); m.position.z = -d / 2; return m; };
+      const claw = flat(new THREE.Shape([...arc(u => Rc + wid(u) / 2, 0, 1), ...arc(u => Rc - wid(u) / 2, 1, 0)]), .009);
+      claw.material = M.blade; kn.add(claw);
+      // the sharpened inside edge: a band hugging the concave boundary, proud of the blade on both faces
+      const band = flat(new THREE.Shape([...arc(u => Rc - wid(u) / 2 + Math.min(.011, wid(u) * .45), 0, 1), ...arc(u => Rc - wid(u) / 2, 1, 0)]), .0102);
+      band.material = M.edge; kn.add(band);
+      kara = { kn, rest: kn.position.clone() }; mz = -.3; rifle = false; break;
     }
   }
-  vb(g, M.sleeve, .085, .085, .32, .03, -.12, .19, .35); vb(g, M.glove, .07, .07, .08, 0, -.065, .02);
-  if (rifle) { vb(g, M.glove, .07, .06, .09, -.01, -.065, -.42); vb(g, M.sleeve, .085, .085, .36, -.14, -.15, -.24, .3, .55); }
+  // the knife is held further forward than a gun grip, so its forearm comes in lower and wider
+  if (kara) { vb(g, M.sleeve, .07, .07, .26, .085, -.185, .1, .5); Object.assign(kara, vFist(g, M, kara.rest, KN_REST)); }
+  else { vb(g, M.sleeve, .085, .085, .32, .03, -.12, .19, .35); vb(g, M.glove, .07, .07, .08, 0, -.065, .02); }
+  if (rifle) { vb(g, M.glove, .07, .06, .09, -.01, -.065, hz); vb(g, M.sleeve, .085, .085, .36, -.14, -.15, hz + .18, .3, .55); }
   const muzzle = new THREE.Object3D(); muzzle.position.set(0, .03, mz); g.add(muzzle);
   const flash = new THREE.Sprite(new THREE.SpriteMaterial({ map: TEX_FLASH, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, depthTest: false }));
   flash.scale.setScalar(id === 'wraith' ? .08 : .2); flash.visible = false; muzzle.add(flash);
-  return { g, flash, bfly };
+  return { g, flash, kara };
 }
 const VM = {
   root: new THREE.Group(), cur: null, id: null, kick: 0, flashT: 0, swing: 0, bob: 0, swayX: 0, swayY: 0, cache: {},
@@ -1516,36 +1686,32 @@ const VM = {
   },
 };
 vmScene.add(VM.root);
-const INSPECT_DUR = 2.6;
-const canInspect = () => P.alive && P.cur === 'melee' && P.slots.melee && VM.cur && VM.cur.bfly;
+const INSPECT_DUR = 2.8;
+const canInspect = () => P.alive && P.cur === 'melee' && P.slots.melee && VM.cur && VM.cur.kara;
 function startInspect() {
   if (!canInspect() || P.inspect > 0 || P.switchT > 0) return;
   P.inspect = INSPECT_DUR;
 }
-// a click on every latch, so the flips land on something
-const INSPECT_BEATS = [{ t: .15, v: .9 }, { t: .47, v: 1 }, { t: .79, v: .9 }, { t: .9, v: .7 }, { t: .97, v: 1 }];
+// one click per catch, so every twirl lands on something
+const INSPECT_BEATS = [{ t: .16, v: .55 }, { t: .38, v: 1 }, { t: .67, v: 1 }, { t: .74, v: .6 }, { t: .9, v: 1 }, { t: .99, v: .75 }];
 const seg = (t, a, b) => clamp((t - a) / (b - a), 0, 1);
 const eOut = x => 1 - Math.pow(1 - x, 3);
 const eInOut = x => x < .5 ? 4 * x * x * x : 1 - Math.pow(2 - 2 * x, 3) / 2;
 const eBack = x => { const c = 2.4; return 1 + (c + 1) * Math.pow(x - 1, 3) + c * Math.pow(x - 1, 2); };
-// wind up · snap shut · flip · catch open · flip · snap shut · one-handed flourish · snap open · settle.
-// `roll` always lands on a multiple of 2pi so the knife comes back the way it started.
+// out of the hip · turn the face to the camera · twirl, catch, twirl, catch, reverse twirl · back to the grip.
+// `spin` lands on a multiple of 2pi (two forward turns, one back) so the knife returns the way it started.
 function inspectPose(t) {
   const T = Math.PI * 2;
-  let closed = 0, soloB = 0, roll = 0, tilt = 0, lift = 0, wind = 0;
-  if (t < .07) { const k = eOut(seg(t, 0, .07)); lift = k * .3; wind = k; }
-  else if (t < .15) { const k = eOut(seg(t, .07, .15)); closed = k; lift = .3 + k * .35; wind = 1 - k * .6; tilt = -k * .3; }
-  else if (t < .4) { const e = eInOut(seg(t, .15, .4));
-    roll = e * T; closed = 1 - .7 * Math.sin(e * Math.PI); lift = .65 + e * .35; tilt = -.3 + Math.sin(e * T) * .5; wind = .4 - e * .4; }
-  else if (t < .47) { const k = seg(t, .4, .47); roll = T; closed = 1 - eBack(k); lift = 1; tilt = -.3 * (1 - eOut(k)) + Math.sin(k * Math.PI) * .18; }
-  else if (t < .72) { const e = eInOut(seg(t, .47, .72));
-    roll = T + e * T; closed = .5 - .5 * Math.cos(e * T); lift = 1; tilt = -Math.sin(e * T) * .55; }
-  else if (t < .79) { const k = eOut(seg(t, .72, .79)); roll = 2 * T; closed = k; lift = 1; tilt = -k * .25; }
-  else if (t < .9) { const e = eInOut(seg(t, .79, .9));
-    roll = 2 * T + e * T; closed = 1; soloB = Math.sin(e * Math.PI) * .85; lift = 1; tilt = -.25 + Math.sin(e * T) * .4; }
-  else if (t < .97) { const k = seg(t, .9, .97); roll = 3 * T; closed = 1 - eBack(k); lift = 1; tilt = -.25 * (1 - eOut(k)) + Math.sin(k * Math.PI) * .22; }
-  else { const k = eOut(seg(t, .97, 1)); roll = 3 * T; closed = -.07 * Math.sin((1 - k) * Math.PI); lift = 1 - k; }
-  return { closed, soloB, roll, tilt, lift, wind };
+  let present = 0, spin = 0, tilt = 0, lift = 0, wind = 0;
+  if (t < .07) { const k = eOut(seg(t, 0, .07)); lift = k * .4; present = k * .3; wind = k; tilt = -k * .4; }
+  else if (t < .16) { const k = eOut(seg(t, .07, .16)); lift = .4 + k * .6; present = .3 + k * .7; wind = 1 - k; tilt = -.4 + k * .4; spin = -k * .6; }
+  else if (t < .38) { const e = eInOut(seg(t, .16, .38)); spin = -.6 + e * (T + .6); lift = 1; present = 1; tilt = Math.sin(e * Math.PI) * .28; }
+  else if (t < .45) { const k = seg(t, .38, .45); spin = T - Math.sin(k * Math.PI) * .13; lift = 1; present = 1; tilt = Math.sin(k * Math.PI) * .2; }
+  else if (t < .67) { const e = eInOut(seg(t, .45, .67)); spin = T + e * T; lift = 1; present = 1; tilt = -Math.sin(e * Math.PI) * .28; }
+  else if (t < .74) { const k = seg(t, .67, .74); spin = 2 * T - Math.sin(k * Math.PI) * .13; lift = 1; present = 1 - eOut(k) * .35; tilt = Math.sin(k * Math.PI) * .5; }
+  else if (t < .9) { const e = eInOut(seg(t, .74, .9)); spin = 2 * T - e * T; lift = 1; present = .65 + e * .35; tilt = -Math.sin(e * Math.PI) * .34; }
+  else { const k = eOut(seg(t, .9, 1)); spin = T; lift = 1 - k; present = 1 - k; tilt = Math.sin(k * Math.PI) * .22; }
+  return { present, spin, tilt, lift, wind };
 }
 function updateVM(dt) {
   if (!VM.cur) return;
@@ -1564,6 +1730,8 @@ function updateVM(dt) {
   const y = lerp(-.2, -.13, ads) - Math.abs(Math.cos(VM.bob)) * .012 * bobA - sw * .3 - rl * .08 - plant * .4 + VM.swayY + (P.onGround ? 0 : -.015);
   const z = lerp(-.42, -.3, ads) + VM.kick * .045;
   VM.root.position.set(x, y, z);
+  // the knife lives in the fist, which rides low; lift the whole hand so the blade is on screen
+  if (w.melee) { VM.root.position.x -= .06; VM.root.position.y += .09; }
   VM.root.rotation.set(VM.kick * .08 + rl * .5 - sw * .6 + (w.melee ? -VM.swing * .9 : 0), (w.melee ? VM.swing * .8 : 0), rl * .5 + (w.melee ? .25 : 0));
   // the butterfly knife is the only weapon with an inspect routine
   if (P.inspect > 0) {
@@ -1572,23 +1740,28 @@ function updateVM(dt) {
     const now = P.inspect > 0 ? 1 - P.inspect / INSPECT_DUR : 1;
     for (const b of INSPECT_BEATS) if (b.t > was && b.t <= now) SFX.flick(b.v);
   }
-  const bf = VM.cur.bfly;
-  if (bf) {
-    const pose = P.inspect > 0 ? inspectPose(1 - P.inspect / INSPECT_DUR) : { closed: 0, soloB: 0, roll: 0, tilt: 0, lift: 0, wind: 0 };
-    // the lower handle trails mid-swing (never at either end, so the rest pose stays square) and breaks away alone in the flourish
-    const cB = clamp(pose.closed - .16 * Math.sin(pose.closed * Math.PI) - pose.soloB, -.08, 1);
-    bf.hs[0].rotation.x = -Math.PI * pose.closed;  // top handle folds over the blade
-    bf.hs[1].rotation.x = Math.PI * cB;            // bottom handle folds under it
-    bf.kn.rotation.z = pose.roll;
-    bf.kn.rotation.x = Math.sin(pose.roll) * .12 * pose.lift;
+  const kb = VM.cur.kara;
+  if (kb) {
+    const pose = P.inspect > 0 ? inspectPose(1 - P.inspect / INSPECT_DUR) : { present: 0, spin: 0, tilt: 0, lift: 0, wind: 0 };
+    // rest (present 0): blade downrange, face to the sun. 
+    // inspect (present 1): the face comes round to the camera and `spin` twirls it in the screen plane.
+    // Euler XYZ applies z first, so the spin stays in the knife's own plane whatever the roll is doing.
+    kb.kn.rotation.set(KN_REST + pose.present * (-.3 - KN_REST), pose.tilt * .45, pose.spin);
+    // the fist gives up the grip and slides down to the ring, fingers opening, so the knife can turn on the
+    // finger the way it really does instead of sweeping the blade through a closed hand
+    kb.f.position.set(0, -pose.present * .055, -pose.present * .022);
+    kb.cl.rotation.x = -pose.present * 1.25;
     const L = pose.lift;
-    // during the routine the knife comes in off the hip and toward the middle of the screen
-    VM.root.position.x += -L * .075 + pose.wind * .03;
-    VM.root.position.y += L * .075 - pose.wind * .06;
-    VM.root.position.z += L * .08 - pose.wind * .04;
-    VM.root.rotation.x += -L * .34 + pose.tilt * .5;
-    VM.root.rotation.y += L * .62;
-    VM.root.rotation.z += -L * .26 + pose.tilt * .35;
+    // during the routine the whole hand comes in off the hip and toward the middle of the screen. The lift
+    // is on the arm, never on the knife alone -- the ring has to stay on the finger it is spinning around.
+    VM.root.position.x += -L * .05 + pose.wind * .03;
+    VM.root.position.y += L * .22 - pose.wind * .06;
+    VM.root.position.z += -L * .21 - pose.wind * .04;
+    // the arm stays angled off to the corner rather than swinging across the screen, which is what kept
+    // putting the forearm between the camera and the spinning blade
+    VM.root.rotation.x += -L * .05 + pose.tilt * .35;
+    VM.root.rotation.y += L * .05;
+    VM.root.rotation.z += -L * .3;
   }
   VM.flashT -= dt;
   VM.cur.flash.visible = VM.flashT > 0; if (VM.flashT > 0) VM.cur.flash.material.rotation = Math.random() * TAU;
@@ -1718,8 +1891,8 @@ function updateHUD(dt) {
   // hints
   let hint = '';
   if (G.toastT > 0) hint = G.toast;
-  else if (G.phase === 'freeze') hint = 'Round starts in ' + Math.ceil(G.phaseT);
-  else if (!P.alive) hint = '';
+  else if (G.phase === 'freeze') hint = `<kbd>${K('buy')}</kbd> armory · round starts in ` + Math.ceil(G.phaseT);
+  else if (!P.alive && G.phase === 'live') hint = `<kbd>${K('buy')}</kbd> armory`;
   else if (G.phase === 'live' && G.liveT < 5) hint = 'Eliminate the other side';
   const pick = P.alive && G.phase === 'live' ? nearestDrop() : null;
   if (pick && G.toastT <= 0) hint = `<kbd>${K('drop')}</kbd> pick up <b>${WEAPONS[pick.id].name}</b>`;
@@ -1986,9 +2159,9 @@ const MODES = {
   duel: { name: '1v1 Duel', size: 1, desc: 'One on one. First to 7 rounds.' },
   double: { name: '2v2', size: 2, desc: 'Two on two. Trade with your partner and take the round. First to 7 rounds.' },
 };
-const WIN_ROUNDS = 7, ROUND_TIME = 90, FREEZE_TIME = 4, END_TIME = 4;
+const WIN_ROUNDS = 7, ROUND_TIME = 90, FREEZE_TIME = 12, END_TIME = 4;
 const G = {
-  drops: [], toast: '', toastT: 0, boardT: 0, mode: 'duel', phase: 'menu', phaseT: 0, round: 0,
+  drops: [], toast: '', toastT: 0, boardT: 0, mode: 'duel', phase: 'menu', phaseT: 0, round: 0, shopOpen: false,
   score: { A: 0, B: 0 }, time: 0, liveT: 0, roundKills: 0, over: false, paused: false,
   specTarget: null, specYaw: null, everLocked: false, noLock: false,
   stats: { kills: 0, deaths: 0, hits: 0, hs: 0, hsKills: 0, dmg: 0, shots: 0 },
@@ -2117,9 +2290,54 @@ function lock() {
   } catch (e) { G.noLock = true; $('lockNote').hidden = false; }
 }
 function unlock() { if (document.pointerLockElement) document.exitPointerLock(); }
+
+/* ================= armory ================= */
+// Everything is free, so this is a loadout picker rather than a shop: your pick sticks for the rest of
+// the match and is re-issued every round. Open it between rounds, or while you are waiting to respawn.
+const SHOP = [
+  { cat: 'Primary', items: ['viper', 'tempest', 'wraith', 'longshot', 'none'] },
+  { cat: 'Sidearm', items: ['pistol', 'magnum'] },
+];
+const canShop = () => inPlay() && !G.paused && (G.phase === 'freeze' || G.phase === 'end' || !P.alive);
+function renderShop() {
+  const grid = $('shopGrid'); grid.innerHTML = '';
+  for (const col of SHOP) {
+    const c = document.createElement('div'); c.className = 'shopcol';
+    c.innerHTML = `<div class="lbl">${col.cat}</div>`;
+    for (const id of col.items) {
+      const none = id === 'none', it = none ? null : WEAPONS[id];
+      const picked = none ? settings.loadout === 'none' : (it.slot === 'primary' ? settings.loadout : settings.sidearm) === id;
+      const b = document.createElement('button'); b.className = 'item' + (picked ? ' owned' : '');
+      const stat = none ? 'Sidearm and knife only' : `Head ${it.head} · Body ${it.body} · ${it.rate}/s · ${it.mag} rds`;
+      b.innerHTML = `<span class="nm">${none ? 'No primary' : it.name}<span>FREE</span></span><span class="st">${stat}</span>`;
+      b.onclick = () => shopPick(id);
+      c.appendChild(b);
+    }
+    grid.appendChild(c);
+  }
+}
+function shopPick(id) {
+  const slot = id === 'none' ? 'primary' : WEAPONS[id].slot;
+  if (slot === 'primary') settings.loadout = id; else settings.sidearm = id;
+  saveSettings();
+  // hand it over straight away when there is a live player to hand it to
+  if (P.alive) {
+    P.slots[slot] = id === 'none' ? null : newInst(id);
+    P.cur = P.slots[slot] ? slot : P.slots.primary ? 'primary' : 'secondary';
+    P.reloadT = 0; P.spray = 0; P.inspect = 0; P.zoom = 1; setFov(1, 1);
+    P.switchT = .35; VM.set(P.slots[P.cur].id); SFX.switch();
+  }
+  renderShop();
+}
+function openShop() {
+  if (!canShop() || G.shopOpen) return;
+  G.shopOpen = true; mouseDown = false; rmb = false; renderShop(); $('shop').hidden = false;
+  if (document.pointerLockElement) document.exitPointerLock();
+}
+function closeShop() { if (!G.shopOpen) return; G.shopOpen = false; $('shop').hidden = true; lock(); }
 document.addEventListener('pointerlockchange', () => {
   if (document.pointerLockElement === canvas) { G.everLocked = true; G.paused = false; $('pause').hidden = true; }
-  else if (inPlay() && !G.noLock) pause();
+  else if (inPlay() && !G.shopOpen && !G.noLock) pause();
 });
 document.addEventListener('pointerlockerror', () => {
   // a lock that worked before failed now (e.g. re-requested too soon after Esc): keep paused so a click resumes
@@ -2129,14 +2347,14 @@ document.addEventListener('pointerlockerror', () => {
 function pause() { G.paused = true; mouseDown = false; rmb = false; for (const k in keys) keys[k] = false; $('sens2').value = settings.sens; $('sensOut2').textContent = (+settings.sens).toFixed(2); $('pause').hidden = false; }
 function resume() { $('pause').hidden = true; G.paused = false; initAudio(); lock(); }
 document.addEventListener('mousemove', e => {
-  if (!inPlay() || G.paused || !P.alive) return;
+  if (!inPlay() || G.paused || G.shopOpen || !P.alive) return;
   if (document.pointerLockElement !== canvas && !G.noLock) return;
   const s = .0022 * settings.sens / (P.zoom > 1.01 ? P.zoom * .9 : 1);
   P.yaw -= e.movementX * s; P.pitch = clamp(P.pitch - e.movementY * s, -1.5, 1.5);
   VM.swayX = clamp(VM.swayX - e.movementX * .00006, -.02, .02); VM.swayY = clamp(VM.swayY + e.movementY * .00006, -.02, .02);
 });
 canvas.addEventListener('mousedown', e => {
-  if (!inPlay()) return;
+  if (!inPlay() || G.shopOpen) return;
   initAudio();
   if (document.pointerLockElement !== canvas && !G.noLock) { lock(); return; }
   if (e.button === 0) mouseDown = true; if (e.button === 2) rmb = true;
@@ -2144,7 +2362,7 @@ canvas.addEventListener('mousedown', e => {
 document.addEventListener('mouseup', e => { if (e.button === 0) mouseDown = false; if (e.button === 2) rmb = false; });
 document.addEventListener('contextmenu', e => { if (inPlay()) e.preventDefault(); });
 document.addEventListener('wheel', e => {
-  if (!inPlay() || G.paused) return;
+  if (!inPlay() || G.paused || G.shopOpen) return;
   const order = ['primary', 'secondary', 'melee'].filter(s => P.slots[s]);
   const i = order.indexOf(P.cur); switchTo(order[(i + (e.deltaY > 0 ? 1 : -1) + order.length) % order.length]);
 }, { passive: true });
@@ -2164,10 +2382,12 @@ document.addEventListener('keydown', e => {
   if (PANELS.some(id => !$(id).hidden)) { if (e.code === 'Escape') closePanel(); return; }
   if (!inPlay()) return;
   if (actionOf(e.code) || e.code === 'Tab' || e.ctrlKey) e.preventDefault();
+  if (G.shopOpen) { if (e.code === settings.binds.buy || e.code === 'Escape') closeShop(); return; }
   if (G.paused) { if (e.code === 'Escape') resume(); return; }
   if (e.code === 'Escape' && G.noLock) { pause(); return; }
   if (e.repeat) { keys[e.code] = true; return; }
   keys[e.code] = true;
+  if (actionOf(e.code) === 'buy') { openShop(); return; }
   if (!P.alive) return;
   switch (actionOf(e.code)) {
     case 'primary': switchTo('primary'); break;
@@ -2190,7 +2410,6 @@ $('modeSeg').addEventListener('click', e => {
   settings.mode = b.dataset.v; syncMode(); saveSettings();
   if (G.phase === 'lobby' && NET.host) { netBroadcast({ t: 'roster', roster: rosterMsg() }); renderLobby(); }
 });
-$('loadSeg').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; settings.loadout = b.dataset.v; syncSeg('loadSeg', settings.loadout); saveSettings(); });
 $('pname').addEventListener('input', e => {
   settings.name = e.target.value.slice(0, 14) || 'Player'; saveSettings();
   if (ME) { ME.name = settings.name; if (NET.host) { netBroadcast({ t: 'roster', roster: rosterMsg() }); renderLobby(); } else netSend({ t: 'join', name: settings.name }); }
@@ -2252,7 +2471,7 @@ function beginMatch(isHost) {
 function resetLocalForRound() {
   if (ME) { P.pos.copy(ME.pos); P.yaw = ME.yaw; }
   P.alive = true; P.hp = 100; P.vel.set(0, 0, 0); P.pitch = 0; P.crouch = 0; P.flash = 0; P.hurtT = 0; P.deathT = 0; P.inspect = 0;
-  P.slots = { primary: settings.loadout === 'none' ? null : newInst(settings.loadout), secondary: newInst('pistol'), melee: newInst('knife') };
+  P.slots = { primary: settings.loadout === 'none' ? null : newInst(settings.loadout), secondary: newInst(settings.sidearm || 'pistol'), melee: newInst('knife') };
   P.cur = P.slots.primary ? 'primary' : 'secondary';
   P.reloadT = 0; P.switchT = 0; P.recP = P.recY = 0; P.spray = 0;
   canvas.classList.remove('dead');
@@ -2297,7 +2516,7 @@ function renderKeyList() {
     [mv.every(k => k.length === 1) ? mv.join('') : mv.join(' '), 'Move'], [K('walk'), 'Walk (silent)'],
     [K('jump'), 'Jump'], [K('crouch'), 'Crouch'], ['LMB', 'Fire'], ['RMB', 'Aim / scope'],
     [K('reload'), 'Reload'], [[K('primary'), K('secondary'), K('melee')].join(' '), 'Weapons'],
-    [K('drop'), 'Drop / pick up gun'], [K('inspect'), 'Inspect knife'],
+    [K('drop'), 'Drop / pick up gun'], [K('buy'), 'Armory (free)'], [K('inspect'), 'Inspect knife'],
     [K('score'), 'Scoreboard'], ['ESC', 'Pause · settings'],
   ];
   $('keyList').innerHTML = rows.map(([k, l]) => `<kbd>${k}</kbd><span>${l}</span>`).join('');
@@ -2355,7 +2574,7 @@ applyXh(H.xh);
 
 /* ================= boot ================= */
 setText($('buildDate'), BUILD.date); setText($('buildBy'), BUILD.by);
-renderKeyList(); syncMode(); syncSeg('loadSeg', settings.loadout);
+renderKeyList(); syncMode();
 $('pname').value = settings.name;
 function bindSens(inp, outEl) { inp.addEventListener('input', () => { settings.sens = +inp.value; outEl.textContent = (+inp.value).toFixed(2); saveSettings(); }); }
 bindSens($('sens'), $('sensOut')); bindSens($('sens2'), $('sensOut2'));
