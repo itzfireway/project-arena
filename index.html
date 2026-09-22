@@ -165,7 +165,7 @@
 
   /* ---------- Menus ---------- */
   .overlay{position:absolute;inset:0;display:flex;}
-  #shop{background:rgba(8,11,15,.78);align-items:center;justify-content:center;padding:16px;box-sizing:border-box;overflow-y:auto;}
+  #shop{background:rgba(8,11,15,.78);align-items:safe center;justify-content:safe center;padding:16px;box-sizing:border-box;overflow-y:auto;}
   .shopwrap{width:min(940px,100%);display:flex;flex-direction:column;gap:14px;}
   .shophead{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;}
   .shophead h2{font-family:var(--display);margin:0;font-size:28px;letter-spacing:.14em;}
@@ -183,7 +183,7 @@
   .shopfoot{color:var(--mute);font-size:14px;}
   .shopfoot kbd{font-family:var(--display);color:var(--ink);border:1px solid var(--line);padding:1px 6px;}
   [hidden]{display:none !important;}
-  #menu{background:linear-gradient(90deg,rgba(9,12,17,.94) 0%,rgba(9,12,17,.82) 38%,rgba(9,12,17,.1) 75%);align-items:center;overflow-y:auto;}
+  #menu{background:linear-gradient(90deg,rgba(9,12,17,.94) 0%,rgba(9,12,17,.82) 38%,rgba(9,12,17,.1) 75%);align-items:safe center;overflow-y:auto;}
   .menucol{width:min(460px,100%);padding:40px 16px 40px max(16px,6vw);box-sizing:border-box;display:flex;flex-direction:column;gap:26px;}
   .brand .kick{font-family:var(--display);font-size:12px;letter-spacing:.34em;color:var(--red);font-weight:600;}
   .brand h1{font-family:var(--display);font-weight:700;font-size:clamp(46px,7.4vw,86px);line-height:.9;margin:8px 0 0;letter-spacing:-.01em;}
@@ -240,7 +240,7 @@
   .mode small{font-family:var(--body);font-size:13px;color:var(--mute);line-height:1.25;}
   .mode:hover{border-color:rgba(241,237,228,.4);}
   .mode[aria-pressed="true"]{border-color:var(--red);background:rgba(255,75,92,.1);box-shadow:inset 0 -3px 0 var(--red);}
-  #controls{background:rgba(9,12,17,.86);align-items:center;justify-content:center;padding:16px;box-sizing:border-box;overflow-y:auto;}
+  #controls{background:rgba(9,12,17,.86);align-items:safe center;justify-content:safe center;padding:16px;box-sizing:border-box;overflow-y:auto;}
   .card.wide{width:min(540px,100%);}
   .binds{display:grid;grid-template-columns:1fr auto;gap:6px 16px;align-items:center;max-height:54vh;overflow-y:auto;padding-right:4px;}
   .binds span{color:var(--mute);font-size:15px;}
@@ -295,7 +295,17 @@
   .abrow b em{font-style:normal;color:var(--ac);font-size:11px;letter-spacing:.14em;margin-left:6px;}
   .abrow span{font-size:14px;color:var(--mute);line-height:1.35;}
   .agbtns{max-width:420px;align-self:flex-end;width:100%;}
-  #xhPanel{background:rgba(9,12,17,.86);align-items:center;justify-content:center;padding:16px;box-sizing:border-box;overflow-y:auto;}
+  #agentField{display:flex;flex-direction:column;gap:14px;}
+  #agentField .agents{grid-template-columns:repeat(2,1fr);gap:6px;}
+  #agentField .agcard{min-height:78px;padding:10px;}
+  #agentField .agcard b{font-size:21px;}
+  #agentField .agcard .sig{font-size:90px;top:-12px;}
+  #agentField .agdetail{padding:14px;}
+  #agentField.off .agents,#agentField.off .agdetail{opacity:.35;}
+  .agcard.locked{opacity:.3;filter:grayscale(1);cursor:not-allowed;}
+  .agcard.locked:hover{border-color:var(--line);transform:none;}
+  #allowSeg button[aria-pressed="false"]{opacity:.5;}
+  #xhPanel{background:rgba(9,12,17,.86);align-items:safe center;justify-content:safe center;padding:16px;box-sizing:border-box;overflow-y:auto;}
   .xhprev{position:relative;height:120px;background:linear-gradient(#a9bccb,#e6cfae 55%,#9d9383);border:1px solid var(--line);}
   .swatches{display:flex;flex-wrap:wrap;gap:6px;align-items:center;}
   .swatches button{width:28px;height:28px;border:2px solid transparent;padding:0;outline:1px solid var(--line);}
@@ -319,6 +329,11 @@
   <div class="hud" id="hud" hidden>
     <div class="fx" id="lowfx"></div>
     <div class="fx" id="hurtfx"></div>
+    <div class="fx" id="smokefx"></div>
+    <div class="fx" id="ribfx"></div>
+    <div class="fx" id="healfx"></div>
+    <div id="ribTag" hidden></div>
+    <div id="stimTag" hidden></div>
     <div id="scope" hidden></div>
     <div id="crosshair" class="xh"><i class="t"></i><i class="b"></i><i class="l"></i><i class="r"></i><i class="d"></i></div>
     <div id="hitmark"><i></i><i></i><i></i><i></i></div>
@@ -335,6 +350,12 @@
       <div class="hpbox">
         <div class="hprow"><span id="hp">100</span></div>
         <div class="hpbar"><div id="hpfill" style="width:100%"></div></div>
+      </div>
+      <div class="abil" id="abilRow" hidden>
+        <div class="ab" id="ab0"><div class="k">Q</div><div class="n"></div><div class="c"></div></div>
+        <div class="ab" id="ab1"><div class="k">E</div><div class="n"></div><div class="c"></div></div>
+        <div class="ab" id="ab2"><div class="k">Z</div><div class="n"></div><div class="c"></div></div>
+        <div class="ab ult" id="ab3"><div class="k">X</div><div class="n">ULT</div><div class="c"></div></div>
       </div>
     </div>
     <div id="arms">
@@ -395,6 +416,26 @@
           <span class="lbl">Players <span id="lobbyCount" class="mute"></span></span>
           <div id="lobbyList" class="lobbylist"></div>
         </div>
+        <div id="agentField">
+          <div class="field">
+            <span class="lbl" id="agLbl">Your agent</span>
+            <div class="agents" id="agentGrid" role="group" aria-labelledby="agLbl"></div>
+            <div class="agdetail" id="agDetail"></div>
+          </div>
+          <div class="field" id="allowField">
+            <span class="lbl" id="alLbl">Agents allowed</span>
+            <div class="seg" id="allowSeg" role="group" aria-labelledby="alLbl"></div>
+            <p class="tip" id="alNote"></p>
+          </div>
+          <div class="field">
+            <span class="lbl" id="abLbl">Agents this match</span>
+            <div class="seg" id="abilSeg" role="group" aria-labelledby="abLbl">
+              <button data-v="on">ABILITIES ON</button>
+              <button data-v="off">GUNS ONLY</button>
+            </div>
+            <p class="tip" id="abNote"></p>
+          </div>
+        </div>
         <button class="cta" id="startMatch">START MATCH</button>
         <button class="ghost" id="leave">LEAVE</button>
       </div>
@@ -402,7 +443,7 @@
       <div id="netStatus"></div>
       <div class="row"><button class="ghost" id="menuControls">CONTROLS</button><button class="ghost" id="menuXh">CROSSHAIR</button></div>
       <div class="keys" id="keyList"></div>
-      <p class="tip">Tip: <b>planked wooden walls</b> and <b>brown crates</b> are thin enough to shoot through. Concrete and teal metal crates stop bullets.</p>
+      <p class="tip">Tip: <b>planked wooden walls</b> and <b>brown crates</b> are thin enough to shoot through — every main lane has one. Concrete and teal metal crates stop bullets.</p>
       <div class="note" id="touchNote" hidden>Project Arena needs a keyboard and mouse.</div>
       <div class="credits">
         <div class="crow"><span>LAST UPDATED</span><b id="buildDate">—</b></div>
@@ -490,17 +531,19 @@ const ACTIONS = [
   ['walk', 'Walk (silent)', 'ShiftLeft'], ['crouch', 'Crouch', 'KeyC'], ['jump', 'Jump', 'Space'], ['reload', 'Reload', 'KeyR'],
   ['primary', 'Primary weapon', 'Digit1'], ['secondary', 'Sidearm', 'Digit2'], ['melee', 'Karambit', 'Digit3'],
   ['drop', 'Drop / pick up gun', 'KeyG'], ['inspect', 'Inspect knife', 'KeyY'], ['buy', 'Weapon shop', 'KeyB'],
+  ['ab1', 'Ability 1', 'KeyQ'], ['ab2', 'Signature ability', 'KeyE'], ['ab3', 'Ability 3', 'KeyZ'], ['ult', 'Ultimate', 'KeyX'],
   ['score', 'Scoreboard (hold)', 'Tab'],
 ];
 const DEFAULT_BINDS = Object.fromEntries(ACTIONS.map(a => [a[0], a[2]]));
 // bump this when you ship a change
-const BUILD = { date: '21 SEP 2026', by: 'ITZFIREWAY' };
+const BUILD = { date: '22 SEP 2026', by: 'ITZFIREWAY' };
 const ROOM_HINT = 'Share your link and play from anywhere.';
 const XH_DEFAULT = { color: '#8dffd8', len: 6, th: 2, gap: 3, dot: true, dotSize: 2, lines: true, outline: true, dynamic: true, alpha: 1 };
-const settings = { name: '', mode: 'duel', loadout: 'tempest', sidearm: 'pistol', sens: 1 };
+const settings = { name: '', mode: 'duel', loadout: 'tempest', sidearm: 'pistol', sens: 1, agent: 'jett', abilities: true, allowed: null };
 if (!settings.name) settings.name = 'Player' + (100 + Math.floor(Math.random() * 900));
 try { Object.assign(settings, JSON.parse(localStorage.getItem('project-arena') || '{}')); } catch (e) {}
-delete settings.map; delete settings.diff; delete settings.bots; delete settings.mates; delete settings.agent;
+delete settings.map; delete settings.diff; delete settings.bots; delete settings.mates;
+settings.abilities = settings.abilities !== false;
 { const saved = settings.binds || {}; settings.binds = {}; for (const [id, , def] of ACTIONS) settings.binds[id] = saved[id] || def; }
 settings.xh = Object.assign({}, XH_DEFAULT, settings.xh);
 function saveSettings() { try { localStorage.setItem('project-arena', JSON.stringify(settings)); } catch (e) {} }
@@ -657,39 +700,40 @@ const spikeLight = new THREE.PointLight(0xff3b4f, 0, 7, 2); scene.add(spikeLight
 // Small symmetric maps built for 1v1 and 2v2: two spawns facing each other across cover,
 // no sites and no bots, so a map is just boxes + spawn points + how big the arena is.
 // boxes are [centreX, centreZ, width, depth, height, material]; 'thin' planks and 'crateB' wood shoot through.
+// Both arenas are deliberately airy: wide lanes, low cover you can shoot over, and at least one
+// planked wall on every main sightline so a held angle can always be answered through the wall.
 const MAPS = {
   crossfire: {
-    name: 'Crossfire', sub: 'Tight box · long sightline down the middle',
-    half: { x: 26, z: 20 },
+    name: 'Crossfire', sub: 'Open box · long sightline down the middle, planked centre',
+    half: { x: 30, z: 22 },
     boxes: [
-      [0, 0, 4, 10, 6, 'wall'],
-      [-12, -6, 8, 2, 6, 'wall'], [12, 6, 8, 2, 6, 'wall'],
-      [-12, 8, 2, 8, 6, 'thin'], [12, -8, 2, 8, 6, 'thin'],
-      [-19, -2, 2, 2, 3, 'pillar'], [19, 2, 2, 2, 3, 'pillar'],
-      [-6, 12, 2.4, 2.4, 2.4, 'crateB'], [6, -12, 2.4, 2.4, 2.4, 'crateB'],
-      [-20, 12, 3, 3, 1, 'crateA'], [20, -12, 3, 3, 1, 'crateA'],
-      [-20, -13, 2, 2, 1.6, 'crateB'], [20, 13, 2, 2, 1.6, 'crateB'],
-      [0, 15, 5, 2, 1, 'crateA'], [0, -15, 5, 2, 1, 'crateA'],
-      [-8, 0, 2, 2, 1, 'crateA'], [8, 0, 2, 2, 1, 'crateA'],
+      [0, 0, 3, 8, 6, 'thin'],                                          // the centre wall shoots through
+      [-13, -7, 7, 2, 3.2, 'wall'], [13, 7, 7, 2, 3.2, 'wall'],         // low enough to shoot over
+      [-13, 9, 2, 7, 6, 'thin'], [13, -9, 2, 7, 6, 'thin'],
+      [-21, -3, 2, 2, 3, 'pillar'], [21, 3, 2, 2, 3, 'pillar'],
+      [-7, 14, 2.4, 2.4, 2.4, 'crateB'], [7, -14, 2.4, 2.4, 2.4, 'crateB'],
+      [-22, 14, 3, 3, 1, 'crateA'], [22, -14, 3, 3, 1, 'crateA'],
+      [0, 17, 5, 2, 1, 'crateA'], [0, -17, 5, 2, 1, 'crateA'],
+      [-9, 0, 2, 2, 1, 'crateA'], [9, 0, 2, 2, 1, 'crateA'],
     ],
-    spawns: { A: [{ x: -22, z: 15 }, { x: -22, z: 10 }], B: [{ x: 22, z: -15 }, { x: 22, z: -10 }] },
+    spawns: { A: [{ x: -26, z: 17 }, { x: -26, z: 12 }], B: [{ x: 26, z: -17 }, { x: 26, z: -12 }] },
   },
   lantern: {
-    name: 'Lantern', sub: 'Central hall with two flanking lanes',
-    half: { x: 28, z: 18 },
+    name: 'Lantern', sub: 'Wide hall with two flanking lanes you can shoot into',
+    half: { x: 32, z: 21 },
     boxes: [
-      [0, 0, 10, 6, 3, 'wall'],
-      [-9, -10, 2, 14, 6, 'wall'], [9, 10, 2, 14, 6, 'wall'],
-      [-9, 10, 2, 14, 6, 'wall'], [9, -10, 2, 14, 6, 'wall'],
-      [0, -14, 12, 2, 6, 'thin'], [0, 14, 12, 2, 6, 'thin'],
-      [-18, 0, 2, 12, 6, 'wall'], [18, 0, 2, 12, 6, 'wall'],
-      [-23, -9, 3, 3, 1, 'crateA'], [23, 9, 3, 3, 1, 'crateA'],
-      [-23, 9, 2.4, 2.4, 2.4, 'crateB'], [23, -9, 2.4, 2.4, 2.4, 'crateB'],
-      [-14, 5, 2, 2, 1, 'crateA'], [14, -5, 2, 2, 1, 'crateA'],
-      [-4, -7, 2, 2, 1.6, 'crateB'], [4, 7, 2, 2, 1.6, 'crateB'],
-      [-13, -4, 2, 2, 3, 'pillar'], [13, 4, 2, 2, 3, 'pillar'],
+      [0, 0, 9, 5, 2.6, 'thin'],                                        // centre block: low enough to peek over, thin enough to shoot through
+      [-10, -11, 2, 11, 6, 'wall'], [10, 11, 2, 11, 6, 'wall'],
+      [-10, 11, 2, 11, 6, 'thin'], [10, -11, 2, 11, 6, 'thin'],         // the flank walls are planks
+      [0, -16, 10, 2, 6, 'thin'], [0, 16, 10, 2, 6, 'thin'],
+      [-20, 0, 2, 9, 6, 'wall'], [20, 0, 2, 9, 6, 'wall'],
+      [-26, -10, 3, 3, 1, 'crateA'], [26, 10, 3, 3, 1, 'crateA'],
+      [-26, 10, 2.4, 2.4, 2.4, 'crateB'], [26, -10, 2.4, 2.4, 2.4, 'crateB'],
+      [-15, 6, 2, 2, 1, 'crateA'], [15, -6, 2, 2, 1, 'crateA'],
+      [-5, -8, 2, 2, 1.6, 'crateB'], [5, 8, 2, 2, 1.6, 'crateB'],
+      [-14, -4, 2, 2, 3, 'pillar'], [14, 4, 2, 2, 3, 'pillar'],
     ],
-    spawns: { A: [{ x: -25, z: 0 }, { x: -25, z: 5 }], B: [{ x: 25, z: 0 }, { x: 25, z: -5 }] },
+    spawns: { A: [{ x: -29, z: 0 }, { x: -29, z: 6 }], B: [{ x: 29, z: 0 }, { x: 29, z: -6 }] },
   },
 };
 const MAP_IDS = Object.keys(MAPS);
@@ -963,6 +1007,10 @@ const teamMat = {
     outline: new THREE.MeshBasicMaterial({ color: 0x45e0c3, side: THREE.BackSide }),
   },
 };
+// shown around a player's head while they are blinded, so you know your flash landed
+const haloGeo = new THREE.SphereGeometry(.27, 18, 14), haloOrbGeo = new THREE.SphereGeometry(.05, 10, 8);
+const haloMat = new THREE.MeshBasicMaterial({ color: 0xfff2b0, transparent: true, opacity: .3, blending: THREE.AdditiveBlending, depthWrite: false });
+const haloOrbMat = new THREE.MeshBasicMaterial({ color: 0xfffbe6 });
 function bpart(parent, w, h, d, x, y, z, mat, outline = null) {
   const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat); m.position.set(x, y, z); m.castShadow = true; parent.add(m);
   if (outline) { const o = new THREE.Mesh(m.geometry, outline); o.scale.set((w + .05) / w, (h + .05) / h, (d + .05) / d); m.add(o); }
@@ -1013,8 +1061,11 @@ function makeBotMesh(ally) {
   const gun = bpart(body, .07, .11, .62, .12, 1.3, -.48, botMat.gun);
   const flash = new THREE.Sprite(new THREE.SpriteMaterial({ map: TEX_FLASH, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false }));
   flash.scale.setScalar(.55); flash.position.set(.12, 1.32, -.86); flash.visible = false; body.add(flash);
+  const halo = new THREE.Group(); halo.position.set(0, 1.67, 0); halo.add(new THREE.Mesh(haloGeo, haloMat));
+  const orbs = [0, 1, 2].map(() => { const o = new THREE.Mesh(haloOrbGeo, haloOrbMat); halo.add(o); return o; });
+  halo.visible = false; body.add(halo);
   scene.add(g);
-  return { g, body, legL, legR, gun, flash, bar: makeBar() };
+  return { g, body, legL, legR, gun, flash, halo, orbs, bar: makeBar() };
 }
 const isLow = e => !!e.low;
 function botBoxes(b) {
@@ -1054,7 +1105,7 @@ const NET_LAG = .1;
 
 function makePlayer(id, name, team) {
   return {
-    id, name, team, hp: 100, alive: true, k: 0, d: 0, dmg: 0, pos: new V3(), yaw: Math.PI, pitch: 0,
+    id, name, team, hp: 100, alive: true, k: 0, d: 0, dmg: 0, pos: new V3(), yaw: Math.PI, pitch: 0, agent: 'jett', blind: false, burn: 0,
     low: false, moving: 0, weapon: 'pistol', mesh: null, buf: [], hitBy: new Map(), walk: 0, deathT: 0, shotT: 0,
   };
 }
@@ -1102,6 +1153,7 @@ function updateRemotes(dt) {
       const k = Math.min(1, pl.deathT / .4);
       m.g.rotation.set(k * k * 1.5, pl.yaw, 0); m.g.position.set(pl.pos.x, -k * .05, pl.pos.z);
       m.g.visible = pl.deathT < 1.2 && inPlay();
+      m.halo.visible = false;
       continue;
     }
     pl.deathT = 0;
@@ -1114,6 +1166,11 @@ function updateRemotes(dt) {
     m.gun.rotation.x = clamp(-pl.pitch, -.8, .8);
     pl.shotT = Math.max(0, pl.shotT - dt);
     m.flash.visible = pl.shotT > 0;
+    m.halo.visible = !!pl.blind;
+    if (pl.blind) {
+      m.halo.rotation.y += dt * 4; m.halo.scale.setScalar(1);
+      m.orbs.forEach((o, i) => { const a = G.time * 5 + i * TAU / 3; o.position.set(Math.cos(a) * .34, Math.sin(G.time * 7 + i * 2) * .07, Math.sin(a) * .34); });
+    }
   }
 }
 
@@ -1134,10 +1191,12 @@ function applyDamage(targetId, dmg, zone, byId, wname) {
   if (by) by.k++;
   pl.d++;
   feedLine(by ? by.name : '—', by ? by.team === ME.team : false, wname || 'ELIMINATED', zone === 'head', pl.name, pl.team === ME.team);
-  if (pl === ME) killedMe(by);
+  if (pl === ME) { killedMe(by); addUlt(1); }
   else if (by === ME) {
     G.stats.kills++; if (zone === 'head') G.stats.hsKills++;
     killBanner(pl.name, zone === 'head'); SFX.kill(++G.roundKills);
+    addUlt(1);
+    if (P.slots.ult && P.cur === 'ult') P.slots.ult.mag = WEAPONS.bladestorm.mag; // Blade Storm kills restore the knives
   }
   return true;
 }
@@ -1160,6 +1219,7 @@ const P = {
   hp: 100, shield: 0, alive: true, credits: 800, slots: {}, cur: 'secondary',
   fireCd: 0, switchT: 0, reloadT: 0, lastShot: -9, spray: 0, recP: 0, recY: 0, punch: 0, ads: false, zoom: 1, triggerLatch: false,
   inspect: 0, prevSlot: 'secondary', slow: false, hitBy: new Map(), flash: 0, stepD: 0, hurtT: 0, deathT: 0, autoReload: 0, jumpHeld: false,
+  abil: [0, 0, 0], ult: 0, stim: false, rib: null, dashT: 0, dashDir: new V3(),
 };
 const RUN = 6.75, WALK = 3.9, CROUCH = 2.8, GRAV = 19, JUMP = 6.4, PR = .33;
 function newInst(id) { const w = WEAPONS[id]; return { id, mag: w.mag || 0, reserve: w.reserve || 0 }; }
@@ -1228,9 +1288,11 @@ function updatePlayer(dt) {
   const w = curW();
   let speed = P.crouch > .5 ? CROUCH : act('walk') ? WALK : RUN;
   if (P.slow) speed *= .5;
+  if (P.stim) speed *= STIM_SPEED;
   if (P.ads && w.scope) speed *= .6;
   speed *= w.speed || 1;
-  if (0) {
+  if (P.dashT > 0) {
+    P.dashT -= dt; P.vel.x = P.dashDir.x * 21; P.vel.z = P.dashDir.z * 21;
   } else {
     const acc = P.onGround ? 16 : 2.2, k = Math.min(1, acc * dt);
     P.vel.x += (wx * speed - P.vel.x) * k; P.vel.z += (wz * speed - P.vel.z) * k;
@@ -1261,6 +1323,7 @@ function updatePlayer(dt) {
   }
   // abilities
   P.flash = Math.max(0, P.flash - dt * .55);
+  if (P.rib) { P.rib.t -= dt; if (P.rib.t <= 0) ribReturn(); }
   P.hurtT = Math.max(0, P.hurtT - dt);
   // camera
   P.punch = Math.max(0, P.punch - dt * .25);
@@ -1268,7 +1331,7 @@ function updatePlayer(dt) {
   // zoom / fov
   const zt = P.ads && P.switchT <= 0 && P.reloadT <= 0 ? (w.adsZoom || 1) : 1;
   P.zoom = lerp(P.zoom, zt, Math.min(1, dt * 16));
-  setFov(P.zoom, 1);
+  setFov(P.zoom, P.dashT > 0 ? 1.08 : 1);
 }
 function makeNoise(r) {} // bots used to hear you; other players just listen to the audio
 function toast(text) { G.toast = text; G.toastT = 1.6; }
@@ -1335,7 +1398,7 @@ function fire() {
   tracer(muzzleWorld(), end, 0xffe0a0);
   sendShot(muzzleWorld(), end, inst.id);
   if (hit.bot) {
-    let dmg = w[hit.zone] * hit.mult;
+    let dmg = w[hit.zone] * hit.mult * stimMul(P);
     if (w.fall && hit.t > w.fall[0]) dmg *= w.fall[1];
     G.stats.hits++; if (hit.zone === 'head') G.stats.hs++;
     const killed = hurtBot(hit.bot, Math.round(dmg), hit.zone);
@@ -1343,17 +1406,19 @@ function fire() {
     if (hit.zone === 'head') SFX.head(); else SFX.hit();
     burst(end, 6, 0xff4b5c, 2.5, .09, .6, .3);
   } else if (hit.box && hit.box.dyn) {
-    hit.box.hp -= w.body * hit.mult; SFX.wallHit(); burst(end.clone().addScaledVector(hit.n, .03), 5, 0xbff4ff, 2.4, .08);
+    const bd = Math.round(w.body * hit.mult);
+    hit.box.hp -= bd; SFX.wallHit(); burst(end.clone().addScaledVector(hit.n, .03), 5, 0xbff4ff, 2.4, .08);
+    if (hit.box.bid) abSay({ a: 'barhit', bid: hit.box.bid, dmg: bd });
   } else if (hit.n) {
     decal(end, hit.n); burst(end.clone().addScaledVector(hit.n, .03), 4, 0xffd080, 2.6, .07);
     burst(end.clone().addScaledVector(hit.n, .05), 2, 0xbfae95, .7, .22, -.05, .5);
   }
-  if (inst.mag <= 0) P.autoReload = .25;
+  if (inst.mag <= 0) { if (w.ult) endBladeStorm(); else P.autoReload = .25; }
 }
 function knife() {
   P.fireCd = .5; VM.swing = 1; nz({ dur: .15, f: 2500, to: 700, type: 'bandpass', q: 1, vol: .35 });
   const d = aimDir(P.yaw, P.pitch), hit = hitscan(camera.position.clone(), d, 2.6);
-  if (hit.bot) { const killed = hurtBot(hit.bot, Math.round(WEAPONS.knife[hit.zone === 'head' ? 'head' : 'body']), hit.zone); hitMarker(killed ? 'kill' : ''); SFX.hit(); burst(camera.position.clone().addScaledVector(d, hit.t), 6, 0xff4b5c, 2, .09); }
+  if (hit.bot) { const killed = hurtBot(hit.bot, Math.round(WEAPONS.knife[hit.zone === 'head' ? 'head' : 'body'] * stimMul(P)), hit.zone); hitMarker(killed ? 'kill' : ''); SFX.hit(); burst(camera.position.clone().addScaledVector(d, hit.t), 6, 0xff4b5c, 2, .09); }
   else if (hit.n && hit.t < 2.6) { nz({ dur: .05, f: 3500, type: 'bandpass', q: 5, vol: .3 }); }
 }
 function startReload() {
@@ -1391,6 +1456,509 @@ function switchTo(slot) {
 function tookHit(from) {
   P.hurtT = .35; P.punch += .01; SFX.hurt();
   if (from) showDmgDir(from.pos.x, from.pos.z);
+}
+
+/* ================= agents ================= */
+// The agent roster from Project Valorant, wired up for the network. An ability runs on the caster's
+// machine and is relayed as an `ab` effect, so every browser ends up with the same smoke, fire, wall
+// or flash in the same place. Damage and healing still go through the host, exactly like a gunshot.
+// The host can turn the whole system off in the lobby, which leaves a pure gunfight.
+// kit[0..2] are the three abilities (charges refill each round); kit[3] is the ultimate (charged by points)
+const AGENTS = {
+  jett: {
+    name: 'Jett', role: 'Duelist', color: '#9fd8ff', ultCost: 7,
+    blurb: 'Agile and evasive. Takes risks others can’t: dash into the fight, get the pick, get out.',
+    kit: [
+      { name: 'UPDRAFT', max: 2, move: true, desc: 'Launch yourself high into the air.', use: useUpdraft },
+      { name: 'TAILWIND', max: 1, move: true, desc: 'Instantly dash a short distance in the direction you’re moving.', use: useDash },
+      { name: 'CLOUDBURST', short: 'CLOUD', max: 2, desc: 'Throw a small cloud of fog that briefly blocks vision.', use: useCloudburst },
+      { name: 'BLADE STORM', desc: 'Equip five deadly throwing knives. Kills restore all of them. Press again to re-equip.', use: useBladeStorm },
+    ],
+  },
+  phoenix: {
+    name: 'Phoenix', role: 'Duelist', color: '#ff8a3d', ultCost: 6,
+    blurb: 'Brings the heat. Flashes the angle, burns the corner, and heals in his own fire.',
+    kit: [
+      { name: 'CURVEBALL', short: 'CURVE', max: 2, desc: 'Throw a flare that bursts into blinding light. Anyone looking at it is blinded.', use: useFlare },
+      { name: 'HOT HANDS', max: 1, desc: 'Throw a fireball that burns the ground. Hurts enemies, heals you.', use: useHotHands },
+      { name: 'BLAZE', max: 1, desc: 'Raise a line of fire that blocks vision and burns anyone who crosses it.', use: useBlaze },
+      { name: 'RUN IT BACK', desc: 'Mark your spot. If you die in the next 10 seconds, or time runs out, you’re reborn there at full health.', use: useRunItBack },
+    ],
+  },
+  sage: {
+    name: 'Sage', role: 'Sentinel', color: '#7ce8d0', ultCost: 8,
+    blurb: 'The team’s anchor. Walls off pushes, slows the rush, and keeps everyone standing.',
+    kit: [
+      { name: 'SLOW ORB', short: 'SLOW', max: 2, desc: 'Throw an orb that leaves a field slowing everyone inside.', use: useSlowOrb },
+      { name: 'HEALING ORB', short: 'HEAL', max: 1, desc: 'Heal the teammate in your crosshair, or yourself if no one is there.', use: useHealOrb },
+      { name: 'BARRIER ORB', short: 'WALL', max: 1, desc: 'Raise a solid crystal wall in front of you. It can be shot down.', use: useBarrier },
+      { name: 'RESURRECTION', desc: 'Look at a fallen teammate to bring them back at full health. Needs a teammate, so 2v2 only.', use: useRes },
+    ],
+  },
+  brimstone: {
+    name: 'Brimstone', role: 'Controller', color: '#ffa24b', ultCost: 7,
+    blurb: 'Calls the shots from above: smokes where he wants them, fire where you aren’t welcome.',
+    kit: [
+      { name: 'STIM BEACON', short: 'STIM', max: 1, desc: 'Drop a beacon. You and your teammates deal 25% more weapon damage and move a little faster while standing in it.', use: useStimBeacon },
+      { name: 'INCENDIARY', short: 'FIRE', max: 1, desc: 'Lob a grenade that leaves a wide field of fire.', use: useIncendiary },
+      { name: 'SKY SMOKE', max: 3, desc: 'Call a smoke down anywhere you can see, further than any thrown cloud.', use: useSkySmoke },
+      { name: 'ORBITAL STRIKE', desc: 'Paint a spot and rain down a laser that burns everything standing in it.', use: useOrbitalStrike },
+    ],
+  },
+};
+const AGENT_IDS = Object.keys(AGENTS);
+if (!AGENTS[settings.agent]) { settings.agent = 'jett'; saveSettings(); }
+// the host says which agents are in play; everyone still picks their own out of that list
+settings.allowed = Array.isArray(settings.allowed) ? settings.allowed.filter(id => AGENTS[id]) : [];
+if (!settings.allowed.length) settings.allowed = AGENT_IDS.slice();
+const allowedIds = () => (G.allowed && G.allowed.length ? G.allowed.filter(id => AGENTS[id]) : AGENT_IDS);
+// your pick is remembered even while the host has it locked out, so it comes back when they unlock it
+const myAgentId = () => { const a = allowedIds(); return a.includes(settings.agent) ? settings.agent : a[0]; };
+const curAgent = () => AGENTS[myAgentId()];
+// every effect other players need to see rides the same relay the gunshots use
+function abSay(msg) { if (ME) netSay(Object.assign({ t: 'fx', k: 'ab', id: ME.id }, msg)); }
+function useAbility(i) {
+  if (!G.abilities || !P.alive || !inPlay() || G.paused) return;
+  const ag = curAgent(), a = ag.kit[i];
+  if (G.phase !== 'live' && !a.move) { toast('Abilities unlock when the round starts'); return; }
+  if (i < 3) {
+    if (P.abil[i] <= 0) return;
+    if (a.use() !== false) P.abil[i]--;
+  } else {
+    if (P.slots.ult) { switchTo('ult'); return; }
+    if (P.ult < ag.ultCost) { toast(`${a.name} needs ${ag.ultCost - P.ult} more point${ag.ultCost - P.ult > 1 ? 's' : ''}`); return; }
+    if (a.use() !== false) P.ult = 0;
+  }
+}
+// ult points come from kills, from dying, and one for turning up to a round
+function addUlt(n) {
+  if (!G.abilities) return;
+  const cost = curAgent().ultCost, was = P.ult;
+  P.ult = Math.min(cost, P.ult + n);
+  if (was < cost && P.ult >= cost) { SFX.ultReady(); toast(curAgent().kit[3].name + ' IS READY'); }
+}
+// everything an ability left behind, cleared between rounds on every client
+function clearAbilityFX() {
+  for (const s of G.smokes.splice(0)) { scene.remove(s.grp); s.mat.dispose(); }
+  for (const z of G.zones.splice(0)) if (z.mesh) { scene.remove(z.mesh); z.mesh.traverse(o => { if (o.material) o.material.dispose(); }); }
+  for (const o of G.orbs.splice(0)) { scene.remove(o.m); o.m.material.dispose(); }
+  for (const b of G.barriers.slice()) removeBarrier(b, true);
+  flare = null; flareMesh.visible = false; flareGlow.visible = false;
+  P.rib = null; ribMarker.visible = false; P.slow = false; P.stim = false; P.dashT = 0;
+  $('smokefx').style.opacity = 0;
+}
+
+/* ---------- thrown flare (Curveball) ---------- */
+const flareMesh = new THREE.Mesh(new THREE.SphereGeometry(.09, 10, 8), new THREE.MeshBasicMaterial({ color: 0xfff6d0 }));
+flareMesh.visible = false; scene.add(flareMesh);
+const flareGlow = new THREE.Sprite(new THREE.SpriteMaterial({ map: TEX_SOFT, color: 0xfff4c8, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false }));
+flareGlow.visible = false; scene.add(flareGlow);
+let flare = null;
+function useFlare() {
+  SFX.flare();
+  const d = aimDir(P.yaw, P.pitch);
+  flare = { p: camera.position.clone().addScaledVector(d, .5), v: d.multiplyScalar(17).add(new V3(0, 2.5, 0)), t: 0 };
+  flareMesh.visible = true;
+}
+function updateFlare(dt) {
+  if (!flare) return;
+  flare.t += dt; flare.v.y -= 9 * dt;
+  const step = flare.v.clone().multiplyScalar(dt), len = step.length();
+  if (len > 0) {
+    const dir = step.clone().normalize(), hit = rayWorld(flare.p, dir, len + .1);
+    if (hit.n && hit.t <= len + .1) {
+      flare.p.addScaledVector(dir, Math.max(0, hit.t - .12));
+      const vn = flare.v.dot(hit.n); flare.v.addScaledVector(hit.n, -2 * vn).multiplyScalar(.45);
+    } else flare.p.add(step);
+  }
+  flareMesh.position.copy(flare.p); flareGlow.position.copy(flare.p); flareGlow.visible = true; flareGlow.scale.setScalar(.8);
+  if (flare.t >= .6) popFlare();
+}
+function popFlare() {
+  const p = flare.p.clone(); flare = null; flareMesh.visible = false;
+  abSay({ a: 'flare', p: [p.x, p.y, p.z] });
+  flareAt(p);
+}
+// the burst itself. Each client works out for itself how badly it was blinded, from where that
+// player happened to be looking -- the same reason you never have to lead a shot in this game.
+function flareAt(p) {
+  flareGlow.position.copy(p); flareGlow.visible = true;
+  flareGlow.scale.setScalar(9); flareGlow.userData.t = .35;
+  fxLight.position.copy(p); fxLight.color.setHex(0xfff4d6); fxLight.intensity = 14;
+  const s = spatial(p.x, p.z); SFX.pop(s.vol, s.pan);
+  if (P.alive && losClear(camera.position.x, camera.position.y, camera.position.z, p.x, p.y, p.z, false)) {
+    const f = aimDir(P.yaw, P.pitch), to = p.clone().sub(camera.position).normalize(), dot = f.dot(to);
+    const k = dot > .5 ? 1 : dot > 0 ? .6 : dot > -.5 ? .2 : 0;
+    P.flash = Math.max(P.flash, k * 1.6);
+  }
+}
+
+/* ---------- clouds: smoke (Cloudburst, Sky Smoke) and fire walls (Blaze); both block sight ---------- */
+const smokeGeo = new THREE.SphereGeometry(1, 14, 10);
+const fireGeo = new THREE.CylinderGeometry(.75, .95, 3.2, 12, 1, true);
+function addCloud(x, z, r, dur, fire = false) {
+  const grp = new THREE.Group(); grp.position.set(x, 0, z);
+  let mat;
+  if (fire) {
+    mat = new THREE.MeshBasicMaterial({ color: 0xff7a2a, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide });
+    const outer = new THREE.Mesh(fireGeo, mat); outer.position.y = 1.6; grp.add(outer);
+    const inner = new THREE.Mesh(fireGeo, mat); inner.position.y = 1.3; inner.scale.set(.6, .8, .6); grp.add(inner);
+  } else {
+    mat = new THREE.MeshStandardMaterial({ color: 0x7f9a9c, roughness: 1, transparent: true, opacity: 0, depthWrite: false });
+    const s = r / 4;
+    for (let i = 0; i < 11; i++) {
+      const m = new THREE.Mesh(smokeGeo, mat), a = i / 11 * TAU;
+      m.position.set(i ? Math.cos(a) * rand(1, 2) * s : 0, rand(1, 2.6) * Math.max(.7, s), i ? Math.sin(a) * rand(1, 2) * s : 0);
+      m.scale.setScalar((i ? rand(1.8, 2.4) : 3) * s); grp.add(m);
+    }
+  }
+  scene.add(grp);
+  const c = { x, z, r, t: dur, t0: dur, k: 0, grp, mat, fire };
+  G.smokes.push(c);
+  return c;
+}
+// where you are looking on the ground, kept inside the arena
+function aimGroundPoint(maxD) {
+  const d = aimDir(P.yaw, P.pitch), hit = rayWorld(camera.position, d, maxD);
+  const pt = camera.position.clone().addScaledVector(d, Math.max(1, hit.t - .6));
+  return { x: +clamp(pt.x, -HALF.x + 1, HALF.x - 1).toFixed(2), z: +clamp(pt.z, -HALF.z + 1, HALF.z - 1).toFixed(2) };
+}
+function smokeAt(x, z, r, dur) { addCloud(x, z, r, dur); SFX.smoke(); }
+function useCloudburst() { const p = aimGroundPoint(16); smokeAt(p.x, p.z, 2.6, 5); abSay({ a: 'smoke', x: p.x, z: p.z, r: 2.6, dur: 5 }); }
+function useSkySmoke() {
+  const p = aimGroundPoint(34); smokeAt(p.x, p.z, 3.8, 14); abSay({ a: 'smoke', x: p.x, z: p.z, r: 3.8, dur: 14 });
+  toast('Sky smoke deployed');
+}
+function useBlaze() {
+  const f = aimDir(P.yaw, 0); let px = P.pos.x + f.x * 1.2, pz = P.pos.z + f.z * 1.2; const pts = [];
+  for (let i = 0; i < 7; i++) {
+    const x = P.pos.x + f.x * (2 + i * 1.5), z = P.pos.z + f.z * (2 + i * 1.5);
+    if (!losClear(px, 1, pz, x, 1, z, false)) break;
+    pts.push([+x.toFixed(2), +z.toFixed(2)]); px = x; pz = z;
+  }
+  if (!pts.length) { toast('No room for Blaze here'); return false; }
+  blazeAt(pts, true, ME.team);
+  abSay({ a: 'blaze', pts, tm: ME.team });
+}
+function blazeAt(pts, own, team) {
+  for (const [x, z] of pts) {
+    const c = addCloud(x, z, 1.1, 8, true);
+    G.zones.push({ kind: 'fire', x, z, r: 1.1, t: 8, t0: 8, dmg: 30, heal: 12.5, name: 'BLAZE', mesh: null, cloud: c, own, team });
+  }
+  const s = spatial(pts[0][0], pts[0][1]); SFX.fire(s.vol, s.pan);
+}
+function updateSmokes(dt) {
+  let inside = 0;
+  for (let i = G.smokes.length - 1; i >= 0; i--) {
+    const s = G.smokes[i]; s.t -= dt;
+    s.k = s.t > s.t0 - .8 ? Math.min(1, s.k + dt * 1.6) : s.t < 1 ? Math.max(0, s.t) : 1;
+    if (s.fire) {
+      s.mat.opacity = (.42 + Math.sin(G.time * 17 + s.x) * .08) * s.k;
+      s.grp.scale.set(1, .3 + .7 * s.k, 1);
+      s.grp.children[1].rotation.y += dt * 2;
+    } else {
+      s.mat.opacity = .93 * s.k; s.grp.scale.setScalar(.3 + .7 * s.k);
+      s.grp.children.forEach((m, j) => { m.rotation.y += dt * .1; m.position.y += Math.sin(G.time * .5 + j) * .002; });
+      const d = Math.hypot(camera.position.x - s.x, camera.position.z - s.z);
+      if (d < s.r * .95 && camera.position.y < 4) inside = Math.max(inside, s.k * clamp((s.r * .95 - d) / 1.2, 0, 1));
+    }
+    if (s.t <= 0) { scene.remove(s.grp); s.mat.dispose(); G.smokes.splice(i, 1); }
+  }
+  $('smokefx').style.opacity = inside;
+  if (flareGlow.userData.t > 0) {
+    flareGlow.userData.t -= dt; flareGlow.material.opacity = Math.max(0, flareGlow.userData.t / .35);
+    if (flareGlow.userData.t <= 0) { flareGlow.visible = false; flareGlow.material.opacity = 1; }
+  }
+}
+
+/* ---------- thrown orbs (Hot Hands, Slow Orb, Stim Beacon) and the ground zones they leave ---------- */
+const orbGeo = new THREE.SphereGeometry(.12, 12, 10);
+function spawnOrb(p, v, color, onPop) {
+  const m = new THREE.Mesh(orbGeo, new THREE.MeshBasicMaterial({ color }));
+  const glow = new THREE.Sprite(new THREE.SpriteMaterial({ map: TEX_SOFT, color, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false }));
+  glow.scale.setScalar(.9); m.add(glow); scene.add(m);
+  G.orbs.push({ p: p.clone(), v: v.clone(), t: 0, m, onPop });
+  SFX.toss();
+}
+// the thrower owns the zone the orb leaves; everyone else just watches the orb fly
+function throwOrb(color, speed, onPop) {
+  const d = aimDir(P.yaw, P.pitch);
+  const p = camera.position.clone().addScaledVector(d, .5), v = d.clone().multiplyScalar(speed).add(new V3(0, 3, 0));
+  spawnOrb(p, v, color, onPop);
+  abSay({ a: 'orb', p: [+p.x.toFixed(2), +p.y.toFixed(2), +p.z.toFixed(2)], v: [+v.x.toFixed(2), +v.y.toFixed(2), +v.z.toFixed(2)], col: color });
+}
+function updateOrbs(dt) {
+  for (let i = G.orbs.length - 1; i >= 0; i--) {
+    const o = G.orbs[i]; o.t += dt; o.v.y -= 12 * dt;
+    const step = o.v.clone().multiplyScalar(dt), len = step.length();
+    let pop = o.t > 3;
+    if (len > 0) {
+      const dir = step.clone().normalize(), hit = rayWorld(o.p, dir, len + .1);
+      if (hit.n && hit.t <= len + .1) {
+        o.p.addScaledVector(dir, Math.max(0, hit.t - .1));
+        if (hit.n.y > .5) pop = true; else { const vn = o.v.dot(hit.n); o.v.addScaledVector(hit.n, -2 * vn).multiplyScalar(.5); }
+      } else o.p.add(step);
+    }
+    o.m.position.copy(o.p);
+    if (pop) { scene.remove(o.m); o.m.material.dispose(); G.orbs.splice(i, 1); if (o.onPop) o.onPop(o.p.x, o.p.y, o.p.z); }
+  }
+}
+function addZone(kind, x, y, z, r, dur, color, extra) {
+  const grp = new THREE.Group(); grp.position.set(x, y + .03, z);
+  const disc = new THREE.Mesh(new THREE.CircleGeometry(r, 36), new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false }));
+  disc.rotation.x = -Math.PI / 2; grp.add(disc);
+  const ring = new THREE.Mesh(new THREE.RingGeometry(r - .12, r, 48), new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide }));
+  ring.rotation.x = -Math.PI / 2; ring.position.y = .01; grp.add(ring);
+  const puffs = [];
+  for (let i = 0; i < 9; i++) {
+    const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: TEX_SOFT, color, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false }));
+    const a = rand(0, TAU), rr = Math.sqrt(Math.random()) * r * .85;
+    sp.position.set(Math.cos(a) * rr, .3, Math.sin(a) * rr); sp.userData.ph = rand(0, TAU); grp.add(sp); puffs.push(sp);
+  }
+  scene.add(grp);
+  const z0 = Object.assign({ kind, x, z, r, t: dur, t0: dur, mesh: grp, disc, ring, puffs }, extra);
+  G.zones.push(z0);
+  return z0;
+}
+// place a zone locally and tell everyone else about it
+function castZone(kind, x, y, z, r, dur, color, extra) {
+  const e = Object.assign({}, extra);
+  zoneAt(kind, x, y, z, r, dur, color, Object.assign({ own: true, team: ME.team }, e));
+  abSay({ a: 'zone', zk: kind, x: +x.toFixed(2), y: +y.toFixed(2), z: +z.toFixed(2), r, dur, col: color, e, tm: ME.team });
+}
+function zoneAt(kind, x, y, z, r, dur, color, extra) {
+  const zn = addZone(kind, x, y, z, r, dur, color, extra);
+  const s = spatial(x, z);
+  if (kind === 'fire') SFX.fire(s.vol, s.pan);
+  else if (kind === 'slow') SFX.slow(s.vol, s.pan);
+  else SFX.heal();
+  if (extra.pillar) {
+    const pil = new THREE.Mesh(new THREE.CylinderGeometry(r - .4, r - .4, 14, 24, 1, true),
+      new THREE.MeshBasicMaterial({ color: 0xffc15a, transparent: true, opacity: .16, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide }));
+    pil.position.y = 7; zn.mesh.add(pil);
+    SFX.boom();
+  }
+  return zn;
+}
+// burns the caster's enemies, heals the caster, slows or stims whoever is standing in it. Only the
+// caster reports the damage, so a fire never hurts anyone twice.
+function updateZones(dt) {
+  P.slow = false; P.stim = false;
+  for (let i = G.zones.length - 1; i >= 0; i--) {
+    const z = G.zones[i]; z.t -= dt;
+    const inZ = (x, zz) => Math.hypot(x - z.x, zz - z.z) < z.r;
+    if (z.mesh) {
+      const k = Math.min(1, (z.t0 - z.t) * 4, z.t);
+      z.disc.material.opacity = (z.kind === 'fire' ? .32 + Math.sin(G.time * 13 + i) * .06 : .22) * k;
+      z.ring.material.opacity = .7 * k;
+      for (const sp of z.puffs) {
+        sp.material.opacity = k * (z.kind === 'fire' ? .8 : .45);
+        sp.position.y = z.kind === 'fire' ? .3 + ((G.time * 1.6 + sp.userData.ph) % 1.2) : .25 + Math.sin(G.time * 2 + sp.userData.ph) * .1;
+        sp.scale.setScalar(z.kind === 'fire' ? .9 : .6);
+      }
+    }
+    if (z.kind === 'slow') {
+      if (P.alive && inZ(P.pos.x, P.pos.z)) P.slow = true;
+    } else if (z.kind === 'stim') {
+      // the buff lasts exactly as long as you stand in the beacon: it is re-applied every frame from scratch
+      if (P.alive && z.team === ME.team && inZ(P.pos.x, P.pos.z)) P.stim = true;
+    } else if (G.phase === 'live' && z.own) {
+      if (P.alive && z.heal && inZ(P.pos.x, P.pos.z) && P.hp < 100) {
+        z.hacc = (z.hacc || 0) + z.heal * dt;
+        if (z.hacc >= 6) { healPlayer(ME, Math.floor(z.hacc)); z.hacc = 0; }
+      }
+      for (const pl of targets()) if (inZ(pl.pos.x, pl.pos.z)) {
+        pl.burn = (pl.burn || 0) + z.dmg * dt;
+        if (pl.burn >= 5) { const n = Math.floor(pl.burn); pl.burn -= n; dealDamage(pl, n, 'body', z.name); }
+      }
+    }
+    if (z.t <= 0) {
+      if (z.mesh) { scene.remove(z.mesh); z.mesh.traverse(o => { if (o.material) o.material.dispose(); if (o.geometry && o.geometry !== orbGeo) o.geometry.dispose(); }); }
+      G.zones.splice(i, 1);
+    }
+  }
+}
+function useHotHands() {
+  throwOrb(0xff7a2a, 15, (x, y, z) => castZone('fire', x, y, z, 3.2, 4.5, 0xff6a1a, { dmg: 60, heal: 12.5, name: 'HOT HANDS' }));
+}
+function useSlowOrb() { throwOrb(0xbfe8ff, 17, (x, y, z) => castZone('slow', x, y, z, 4.5, 6.5, 0x9fd8ff, {})); }
+
+/* ---------- Brimstone: beacon, fire and the orbital ---------- */
+// Stim Beacon: hit harder and move a little quicker while you stand in it
+const STIM_DMG = 1.25, STIM_SPEED = 1.12;
+const stimMul = e => (e.stim ? STIM_DMG : 1);
+function useStimBeacon() { throwOrb(0x9fffd8, 14, (x, y, z) => castZone('stim', x, y, z, 5, 12, 0x7cffd0, {})); }
+function useIncendiary() { throwOrb(0xff7a2a, 16, (x, y, z) => castZone('fire', x, y, z, 4.2, 8, 0xff6a1a, { dmg: 55, name: 'INCENDIARY' })); }
+function useOrbitalStrike() {
+  const p = aimGroundPoint(45);
+  castZone('fire', p.x, 0, p.z, 6, 4.5, 0xffb24b, { dmg: 75, name: 'ORBITAL STRIKE', pillar: true });
+}
+
+/* ---------- movement (Updraft, Tailwind) ---------- */
+function useUpdraft() { P.vel.y = 9.8; P.onGround = false; SFX.updraft(); }
+function useDash() {
+  let fx = 0, fz = 0;
+  if (act('fwd')) fz += 1; if (act('back')) fz -= 1; if (act('left')) fx -= 1; if (act('right')) fx += 1;
+  if (!fx && !fz) fz = 1;
+  const sy = Math.sin(P.yaw), cy = Math.cos(P.yaw);
+  P.dashDir.set(cy * fx - sy * fz, 0, -sy * fx - cy * fz).normalize();
+  P.dashT = .18; SFX.dash();
+}
+
+/* ---------- Blade Storm ---------- */
+function useBladeStorm() {
+  P.prevSlot = P.cur; P.slots.ult = newInst('bladestorm'); P.cur = 'ult';
+  P.switchT = .45; P.reloadT = 0; P.autoReload = 0; P.spray = 0; VM.set('bladestorm'); SFX.switch(); SFX.ultReady();
+}
+function endBladeStorm() {
+  delete P.slots.ult;
+  if (P.cur === 'ult') { P.cur = P.slots[P.prevSlot] ? P.prevSlot : 'secondary'; P.switchT = .45; VM.set(P.slots[P.cur].id); }
+}
+
+/* ---------- Run It Back ---------- */
+const ribMarker = new THREE.Group();
+{
+  const ring = new THREE.Mesh(new THREE.RingGeometry(.45, .6, 40), new THREE.MeshBasicMaterial({ color: 0xff8a3d, transparent: true, opacity: .8, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide }));
+  ring.rotation.x = -Math.PI / 2; ring.position.y = .03; ribMarker.add(ring);
+  const beam = new THREE.Mesh(new THREE.CylinderGeometry(.08, .3, 3, 12, 1, true), new THREE.MeshBasicMaterial({ color: 0xff8a3d, transparent: true, opacity: .35, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide }));
+  beam.position.y = 1.5; ribMarker.add(beam);
+  ribMarker.visible = false; scene.add(ribMarker);
+}
+function useRunItBack() {
+  if (G.phase !== 'live') { toast('Save it for the round'); return false; }
+  P.rib = { x: P.pos.x, y: P.pos.y, z: P.pos.z, yaw: P.yaw, t: 10 };
+  ribMarker.position.set(P.pos.x, P.pos.y, P.pos.z); ribMarker.visible = true; SFX.rib();
+}
+// you are reborn on your own machine and the host is told to put you back on the board
+function ribReturn() {
+  const r = P.rib; P.rib = null; ribMarker.visible = false;
+  P.pos.set(r.x, r.y, r.z); P.vel.set(0, 0, 0); P.yaw = r.yaw; P.pitch = 0;
+  P.hp = 100; P.alive = true; P.flash = 0; P.dashT = 0; P.hurtT = 0; P.deathT = 0;
+  canvas.classList.remove('dead');
+  if (ME) { ME.pos.copy(P.pos); ME.alive = true; ME.hp = 100; revivePlayer(ME); }
+  burst(new V3(r.x, r.y + 1, r.z), 24, 0xff8a3d, 4, .14, .3, .6);
+  SFX.rebirth(); banner('REBORN', 'Run It Back', 'win', 1.2);
+}
+
+/* ---------- Sage ---------- */
+// healing and resurrection both change someone else's health, so they go through the host
+function healPlayer(pl, amt) {
+  amt = Math.round(amt); if (!pl || amt <= 0) return;
+  if (NET.host) { applyHeal(pl.id, amt); netBroadcast({ t: 'heal', to: pl.id, amt }); }
+  else netSend({ t: 'heal', to: pl.id, amt });
+}
+function applyHeal(id, amt) {
+  const pl = players.get(id); if (!pl || !pl.alive) return;
+  // for yourself the live simulation is the truth, not the last snapshot the network sent
+  if (pl === ME) { P.hp = Math.min(100, P.hp + amt); pl.hp = P.hp; }
+  else pl.hp = Math.min(100, pl.hp + amt);
+  burst(new V3(pl.pos.x, 1.4, pl.pos.z), 8, 0x6dffb0, 1.5, .1, -.3, .6);
+}
+function revivePlayer(pl) {
+  if (!pl) return;
+  if (NET.host) { applyRevive(pl.id); netBroadcast({ t: 'res', to: pl.id }); }
+  else netSend({ t: 'res', to: pl.id });
+}
+function applyRevive(id) {
+  const pl = players.get(id); if (!pl) return;
+  pl.alive = true; pl.hp = 100; pl.deathT = 0; pl.hitBy.clear();
+  if (pl.mesh) { pl.mesh.g.rotation.set(0, pl.yaw, 0); pl.mesh.g.position.set(pl.pos.x, 0, pl.pos.z); }
+  burst(new V3(pl.pos.x, 1, pl.pos.z), 22, 0xfff0b0, 3, .14, -.4, 1);
+  if (pl === ME && !P.alive) {
+    P.alive = true; P.hp = 100; P.deathT = 0; P.flash = 0; P.vel.set(0, 0, 0);
+    G.specTarget = null; G.specYaw = null; canvas.classList.remove('dead'); SFX.res();
+  }
+}
+// the teammate under your crosshair, alive or fallen
+function aimedMate(wantAlive, maxD, eyeY, minDot) {
+  const c = camera.position, f = aimDir(P.yaw, P.pitch);
+  let best = null, bd = minDot;
+  for (const pl of players.values()) {
+    if (pl === ME || pl.team !== ME.team || pl.alive !== wantAlive) continue;
+    const dx = pl.pos.x - c.x, dy = eyeY - c.y, dz = pl.pos.z - c.z, d = Math.hypot(dx, dy, dz);
+    if (d > maxD) continue;
+    const dot = (dx * f.x + dy * f.y + dz * f.z) / d;
+    if (dot > bd && losClear(c.x, c.y, c.z, pl.pos.x, eyeY, pl.pos.z, false)) { bd = dot; best = pl; }
+  }
+  return best;
+}
+function useHealOrb() {
+  const mate = aimedMate(true, 16, 1.2, .96);
+  if (mate && mate.hp < 100) { healPlayer(mate, 60); SFX.heal(); feedMsg('YOU', 'healed ' + mate.name, true); return; }
+  if (P.hp >= 100) { toast('Nobody needs healing'); return false; }
+  healPlayer(ME, 60); SFX.heal();
+}
+const MAT_BARRIER = new THREE.MeshStandardMaterial({ color: 0x9fe6f0, emissive: 0x1d5560, roughness: .15, metalness: .1, transparent: true, opacity: .88 });
+let barSeq = 0;
+function useBarrier() {
+  const f = aimDir(P.yaw, 0), alongX = Math.abs(f.z) >= Math.abs(f.x); // wall runs across your view
+  const cx = P.pos.x + f.x * 4.5, cz = P.pos.z + f.z * 4.5, SEG = 1.7, TH = .5;
+  const segs = [];
+  for (let i = -2; i < 2; i++) {
+    const off = (i + .5) * SEG, x = alongX ? cx + off : cx, z = alongX ? cz : cz + off;
+    const hw = alongX ? SEG / 2 : TH / 2, hd = alongX ? TH / 2 : SEG / 2;
+    if (x < -HALF.x + 1 || x > HALF.x - 1 || z < -HALF.z + 1 || z > HALF.z - 1) continue;
+    if (blockedSpot(x, z, hw, hd)) continue;
+    segs.push([+x.toFixed(2), +z.toFixed(2), hw, hd]);
+  }
+  if (!segs.length) { toast('No room for a barrier there'); return false; }
+  const id = ME.id + ':' + (++barSeq);
+  barrierAt(id, segs);
+  abSay({ a: 'bar', bid: id, segs });
+}
+// a wall cannot be raised on top of somebody
+function blockedSpot(x, z, hw, hd) {
+  const near = (px, pz, r) => px + r > x - hw && px - r < x + hw && pz + r > z - hd && pz - r < z + hd;
+  if (near(P.pos.x, P.pos.z, PR)) return true;
+  for (const pl of players.values()) if (pl !== ME && pl.alive && near(pl.pos.x, pl.pos.z, .36)) return true;
+  return false;
+}
+function barrierAt(id, segs) {
+  const BH = 3.4;
+  segs.forEach(([x, z, hw, hd], i) => {
+    const box = { minX: x - hw, maxX: x + hw, minZ: z - hd, maxZ: z + hd, minY: 0, maxY: BH, type: 'barrier', dyn: true, hp: 800, t: 30, bid: id + ':' + i };
+    box.mesh = addMesh(new THREE.BoxGeometry(hw * 2, BH, hd * 2), MAT_BARRIER, x, BH / 2, z);
+    box.mesh.scale.y = .05; box.mesh.position.y = .1;
+    BOXES.push(box); G.barriers.push(box);
+  });
+  SFX.wall();
+}
+// the shooter tells everyone what it took off, so the wall falls at the same moment for all of us
+function hitBarrier(bid, dmg) { const b = G.barriers.find(b => b.bid === bid); if (b) b.hp -= dmg; }
+function removeBarrier(box, quiet = false) {
+  const i = BOXES.indexOf(box); if (i >= 0) BOXES.splice(i, 1);
+  const j = G.barriers.indexOf(box); if (j >= 0) G.barriers.splice(j, 1);
+  scene.remove(box.mesh); box.mesh.geometry.dispose();
+  if (!quiet) burst(new V3((box.minX + box.maxX) / 2, 1.5, (box.minZ + box.maxZ) / 2), 16, 0xbff4ff, 3, .12, 1, .5);
+}
+function updateBarriers(dt) {
+  for (const b of G.barriers.slice()) {
+    b.t -= dt;
+    b.mesh.scale.y = Math.min(1, b.mesh.scale.y + dt * 2.5); b.mesh.position.y = b.maxY / 2 * b.mesh.scale.y;
+    if (b.t <= 0 || b.hp <= 0) removeBarrier(b);
+  }
+}
+function useRes() {
+  if (G.phase !== 'live') { toast('Nobody to bring back'); return false; }
+  const mate = aimedMate(false, 14, .4, .9);
+  if (!mate) { toast('Look at a fallen teammate to resurrect them'); return false; }
+  revivePlayer(mate); SFX.res(); feedMsg('YOU', 'resurrected ' + mate.name, true);
+}
+
+/* ---------- abilities arriving from someone else ---------- */
+function onAbilityFX(d) {
+  switch (d.a) {
+    case 'flare': flareAt(new V3(d.p[0], d.p[1], d.p[2])); break;
+    case 'smoke': smokeAt(d.x, d.z, d.r, d.dur); break;
+    case 'blaze': blazeAt(d.pts, false, d.tm); break;
+    case 'zone': zoneAt(d.zk, d.x, d.y, d.z, d.r, d.dur, d.col, Object.assign({ own: false, team: d.tm }, d.e)); break;
+    case 'orb': spawnOrb(new V3(d.p[0], d.p[1], d.p[2]), new V3(d.v[0], d.v[1], d.v[2]), d.col, null); break;
+    case 'bar': barrierAt(d.bid, d.segs); break;
+    case 'barhit': hitBarrier(d.bid, d.dmg); break;
+  }
+}
+function updateAbilities(dt) {
+  updateFlare(dt); updateSmokes(dt); updateOrbs(dt); updateZones(dt); updateBarriers(dt);
 }
 
 /* ================= dropped guns ================= */
@@ -1774,10 +2342,17 @@ const H = {
   timer: $('timer'), phase: $('phaseLbl'), sy: $('scoreYou'), sf: $('scoreFoe'), pipsYou: $('pipsYou'), pipsFoe: $('pipsFoe'), feed: $('feed'),
   hint: $('hint'), xh: $('crosshair'), hitmark: $('hitmark'), scope: $('scope'), ping: $('ping'),
   flash: $('flashfx'), hurt: $('hurtfx'), low: $('lowfx'), dmgdir: $('dmgdir'), spectate: $('spectate'),
+  abilRow: $('abilRow'), ab: [0, 1, 2, 3].map(i => $('ab' + i)), abK: [0, 1, 2, 3].map(i => $('ab' + i).querySelector('.k')),
+  abN: [0, 1, 2, 3].map(i => $('ab' + i).querySelector('.n')), rib: $('ribTag'), stim: $('stimTag'), ribfx: $('ribfx'), healfx: $('healfx'),
   board: $('board'), boardBody: $('boardBody'), boardHead: $('boardHead'),
   mm: $('minimap'), banner: $('banner'), bBig: $('bannerBig'), bSub: $('bannerSub'), kb: $('killbanner'), kbChev: $('kbChev'), kbTxt: $('kbTxt'),
 };
 let hitT = 0, bannerT = 0;
+// one diamond per charge, greyed out once it is spent
+function abilHTML(el, n, max) {
+  const c = el.querySelector('.c'); let s = ''; for (let i = 0; i < max; i++) s += `<i class="${i < n ? '' : 'used'}"></i>`;
+  setHTML(c, s); el.classList.toggle('empty', n <= 0); el.classList.toggle('ready', n > 0);
+}
 function hitMarker(kind) { H.hitmark.className = kind; H.hitmark.style.opacity = 1; hitT = .18; }
 function banner(big, sub, cls, dur) { H.bBig.textContent = big; H.bBig.className = 'big ' + (cls || ''); H.bSub.textContent = sub; H.banner.classList.add('on'); bannerT = dur; }
 function killBanner(name, hs) {
@@ -1854,7 +2429,7 @@ function drawMinimap() {
   }
 }
 function renderBoard() {
-  const row = pl => `<tr class="${pl === ME ? 'me' : ''}"><td class="nm">${pl.name}</td><td>${pl.k}</td><td>${pl.d}</td><td>${pl.id === NET.id && NET.host ? 'HOST' : ''}</td></tr>`;
+  const row = pl => `<tr class="${pl === ME ? 'me' : ''}"><td class="nm">${pl.name}${G.abilities ? ' <span class="mute">· ' + (AGENTS[pl.agent] || AGENTS.jett).name + '</span>' : ''}</td><td>${pl.k}</td><td>${pl.d}</td><td>${pl.id === NET.id && NET.host ? 'HOST' : ''}</td></tr>`;
   const byK = (a, b) => b.k - a.k;
   setText(H.boardHead, `${MODES[G.mode].name.toUpperCase()} · ROUND ${G.round} · ${MAPS[CURMAP].name.toUpperCase()}`);
   setHTML(H.boardBody,
@@ -1879,7 +2454,16 @@ function updateHUD(dt) {
     if (!P.slots[slot]) continue;
     sl += `<span class="slot ${P.cur === slot ? 'on' : ''}">${K(key)} · ${WEAPONS[P.slots[slot].id].name.split(' ')[0].toUpperCase()}</span>`;
   }
+  if (P.slots.ult) sl += `<span class="slot ${P.cur === 'ult' ? 'on' : ''}">${K('ult')} · BLADE STORM</span>`;
   setHTML(H.slots, sl);
+  // abilities
+  H.abilRow.hidden = !G.abilities;
+  if (G.abilities) {
+    const ag = curAgent();
+    for (let i = 0; i < 3; i++) { abilHTML(H.ab[i], P.abil[i], ag.kit[i].max); setText(H.abK[i], K('ab' + (i + 1))); setText(H.abN[i], ag.kit[i].short || ag.kit[i].name.split(' ').pop()); }
+    abilHTML(H.ab[3], P.ult, ag.ultCost); setText(H.abK[3], K('ult')); setText(H.abN[3], 'ULT');
+    H.ab[3].classList.toggle('full', P.ult >= ag.ultCost || !!P.slots.ult);
+  }
   // score, round clock, who is left
   const foeTeam = ME.team === 'A' ? 'B' : 'A';
   setText(H.sy, String(G.score[ME.team])); setText(H.sf, String(G.score[foeTeam]));
@@ -1915,6 +2499,10 @@ function updateHUD(dt) {
   P.hurtT = Math.max(0, P.hurtT - dt);
   H.hurt.style.opacity = P.hurtT * 2;
   H.flash.style.opacity = Math.min(1, P.flash);
+  H.rib.hidden = !P.rib; if (P.rib) setHTML(H.rib, `RUN IT BACK <b>${Math.ceil(P.rib.t)}</b>`);
+  H.stim.hidden = !(P.alive && P.stim); if (P.stim) setHTML(H.stim, `STIMMED <b>+${Math.round((STIM_DMG - 1) * 100)}% DMG</b>`);
+  H.ribfx.style.opacity = P.rib ? .7 + Math.sin(G.time * 6) * .2 : 0;
+  H.healfx.style.opacity = P.alive && P.hp < 100 && G.zones.some(z => z.heal && z.own && Math.hypot(P.pos.x - z.x, P.pos.z - z.z) < z.r) ? .8 : 0;
   H.low.style.opacity = P.alive && P.hp < 35 ? .6 + Math.sin(G.time * 5) * .2 : 0;
   drawMinimap();
 }
@@ -1954,6 +2542,8 @@ function hostMatch() {
   NET.peer = makePeer(NET.id);
   NET.peer.on('open', () => {
     ME = makePlayer(NET.id, settings.name, 'A');
+    G.abilities = settings.abilities; G.allowed = settings.allowed.slice();
+    ME.agent = myAgentId();
     players.clear(); players.set(ME.id, ME);
     showLobby(code);
     netStatus('Room open · share the link');
@@ -1977,10 +2567,11 @@ function joinMatch(code) {
   NET.peer.on('open', myId => {
     NET.id = myId;
     ME = makePlayer(myId, settings.name, 'B');
+    ME.agent = myAgentId();
     players.clear(); players.set(ME.id, ME);
     const conn = NET.peer.connect(ROOM_PREFIX + code, { reliable: true });
     NET.up = conn;
-    conn.on('open', () => { conn.send({ t: 'join', name: settings.name }); netStatus('Connected · waiting for the host'); });
+    conn.on('open', () => { conn.send({ t: 'join', name: settings.name, ag: myAgentId() }); netStatus('Connected · waiting for the host'); });
     conn.on('data', d => onGuestData(d));
     conn.on('close', () => { if (G.phase !== 'menu') leaveMatch('The host left the match'); });
     conn.on('error', () => netStatus('Connection failed'));
@@ -2001,7 +2592,7 @@ function dropConn(id) {
   const pl = players.get(id);
   if (pl) { feedMsg(pl.name, 'left the match', pl.team === (ME && ME.team)); removePlayer(id); }
   if (G.phase === 'lobby') renderLobby();
-  else if (inPlay() && NET.host) { netBroadcast({ t: 'roster', roster: rosterMsg() }); checkRoundEnd(); }
+  else if (inPlay() && NET.host) { netBroadcast(rosterPacket()); checkRoundEnd(); }
 }
 function leaveMatch(why) {
   if (why) toast(why);
@@ -2018,7 +2609,9 @@ function netClose() {
   for (const id of [...players.keys()]) removePlayer(id);
   players.clear(); ME = null;
 }
-const rosterMsg = () => [...players.values()].map(p => ({ id: p.id, name: p.name, team: p.team, k: p.k, d: p.d }));
+const rosterMsg = () => [...players.values()].map(p => ({ id: p.id, name: p.name, team: p.team, k: p.k, d: p.d, ag: p.agent }));
+// the lobby packet: who is in, and whether the host is running agents this match
+const rosterPacket = () => ({ t: 'roster', roster: rosterMsg(), ab: settings.abilities, al: settings.allowed });
 
 /* ---------- host: messages from a guest ---------- */
 function onHostData(conn, d) {
@@ -2028,15 +2621,17 @@ function onHostData(conn, d) {
       if (players.size >= MODES[settings.mode].size * 2) { conn.send({ t: 'full' }); return; }
       const team = teamCount('A') <= teamCount('B') ? 'A' : 'B';
       const np = makePlayer(conn.peer, String(d.name || 'Player').slice(0, 14), team);
+      np.agent = settings.allowed.includes(d.ag) ? d.ag : settings.allowed[0];
       players.set(np.id, np);
-      conn.send({ t: 'welcome', id: np.id, mode: settings.mode, roster: rosterMsg(), phase: G.phase });
-      netBroadcast({ t: 'roster', roster: rosterMsg() });
+      conn.send({ t: 'welcome', id: np.id, mode: settings.mode, roster: rosterMsg(), phase: G.phase, ab: settings.abilities, al: settings.allowed });
+      netBroadcast(rosterPacket());
       renderLobby();
       feedMsg(np.name, 'joined', false);
       break;
     }
     case 'st':
       if (!pl) return;
+      pl.blind = !!d.b;
       pl.buf.push({ t: now(), x: d.x, y: d.y, z: d.z, yaw: d.yaw, pitch: d.pitch, low: d.low, w: d.w });
       if (pl.buf.length > 8) pl.buf.shift();
       break;
@@ -2044,6 +2639,9 @@ function onHostData(conn, d) {
       applyDamage(d.to, d.d, d.z, d.by, d.w);
       netBroadcast(d);
       break;
+    // a heal or a resurrection is the host's call to make, the same way damage is
+    case 'heal': applyHeal(d.to, d.amt); netBroadcast(d); break;
+    case 'res': applyRevive(d.to); netBroadcast(d); break;
     case 'fx':
       netBroadcast(d, conn.peer);
       remoteFX(d);
@@ -2058,14 +2656,19 @@ function onGuestData(d) {
   switch (d.t) {
     case 'full': netStatus('That match is full'); netClose(); break;
     case 'welcome':
-      G.mode = d.mode;
+      G.mode = d.mode; if (d.ab !== undefined) G.abilities = d.ab; if (d.al) G.allowed = d.al;
       applyRoster(d.roster, d.id);
       showLobby(NET.room);
       netStatus('In the lobby · waiting for the host to start');
       break;
-    case 'roster': applyRoster(d.roster, ME && ME.id); if (G.phase === 'lobby') renderLobby(); break;
+    case 'roster':
+      if (d.ab !== undefined) G.abilities = d.ab;
+      if (d.al) { G.allowed = d.al; if (ME) ME.agent = myAgentId(); }
+      applyRoster(d.roster, ME && ME.id); if (G.phase === 'lobby') renderLobby();
+      break;
     case 'start':
-      G.mode = d.mode; applyRoster(d.roster, ME.id);
+      G.mode = d.mode; if (d.ab !== undefined) G.abilities = d.ab; if (d.al) G.allowed = d.al;
+      applyRoster(d.roster, ME.id);
       buildMap(d.map); beginMatch(false);
       break;
     case 'round':
@@ -2078,6 +2681,8 @@ function onGuestData(d) {
     case 'over': showOver(); break;
     case 'snap': onSnapshot(d); break;
     case 'dmg': applyDamage(d.to, d.d, d.z, d.by, d.w); break;
+    case 'heal': applyHeal(d.to, d.amt); break;
+    case 'res': applyRevive(d.to); break;
     case 'fx': remoteFX(d); break;
     case 'pong': NET.ping = Math.round((now() - d.s) * 1000); break;
   }
@@ -2088,7 +2693,7 @@ function applyRoster(roster, myId) {
     seen.add(r.id);
     let pl = players.get(r.id);
     if (!pl) { pl = makePlayer(r.id, r.name, r.team); players.set(r.id, pl); }
-    pl.name = r.name; pl.team = r.team; pl.k = r.k || 0; pl.d = r.d || 0;
+    pl.name = r.name; pl.team = r.team; pl.k = r.k || 0; pl.d = r.d || 0; pl.agent = AGENTS[r.ag] ? r.ag : 'jett';
     if (r.id === myId) ME = pl;
   }
   for (const id of [...players.keys()]) if (!seen.has(id)) removePlayer(id);
@@ -2097,7 +2702,7 @@ function applyRoster(roster, myId) {
 function applySpawns(list) {
   for (const sp of list) {
     const pl = players.get(sp.id); if (!pl) continue;
-    pl.pos.set(sp.x, 0, sp.z); pl.yaw = sp.yaw; pl.hp = 100; pl.alive = true; pl.deathT = 0; pl.buf.length = 0; pl.hitBy.clear();
+    pl.pos.set(sp.x, 0, sp.z); pl.yaw = sp.yaw; pl.hp = 100; pl.alive = true; pl.deathT = 0; pl.buf.length = 0; pl.hitBy.clear(); pl.blind = false; pl.burn = 0;
   }
   if (ME) { P.pos.copy(ME.pos); P.yaw = ME.yaw; }
   resetLocalForRound();
@@ -2116,12 +2721,13 @@ function netTick() {
   NET.lastSend = t;
   ME.pos.copy(P.pos); ME.yaw = P.yaw; ME.pitch = P.pitch; ME.alive = P.alive;
   ME.low = P.crouch > .5; ME.weapon = P.slots[P.cur] ? P.slots[P.cur].id : 'pistol'; ME.hp = P.hp;
+  ME.blind = P.flash > .15;
   if (NET.host) {
     netBroadcast({ t: 'snap', ph: G.phase, pt: G.phaseT, sc: G.score, rd: G.round, ps: [...players.values()].map(p => ({
-      id: p.id, x: p.pos.x, y: p.pos.y, z: p.pos.z, yaw: p.yaw, pitch: p.pitch, low: !!p.low, w: p.weapon, a: p.alive, hp: Math.round(p.hp), k: p.k, d: p.d,
+      id: p.id, x: p.pos.x, y: p.pos.y, z: p.pos.z, yaw: p.yaw, pitch: p.pitch, low: !!p.low, w: p.weapon, a: p.alive, hp: Math.round(p.hp), k: p.k, d: p.d, b: !!p.blind,
     })) });
   } else {
-    netSend({ t: 'st', x: P.pos.x, y: P.pos.y, z: P.pos.z, yaw: P.yaw, pitch: P.pitch, low: P.crouch > .5, w: ME.weapon });
+    netSend({ t: 'st', x: P.pos.x, y: P.pos.y, z: P.pos.z, yaw: P.yaw, pitch: P.pitch, low: P.crouch > .5, w: ME.weapon, b: ME.blind });
     if (t - NET.pingAt > 2) { NET.pingAt = t; netSend({ t: 'ping', s: t }); }
   }
 }
@@ -2135,7 +2741,7 @@ function onSnapshot(d) {
       pl.alive = q.a; if (!NET.host) P.hp = q.hp;
       continue;
     }
-    pl.hp = q.hp; pl.alive = q.a; pl.weapon = q.w;
+    pl.hp = q.hp; pl.alive = q.a; pl.weapon = q.w; pl.blind = !!q.b;
     pl.buf.push({ t: now(), x: q.x, y: q.y, z: q.z, yaw: q.yaw, pitch: q.pitch, low: q.low, w: q.w });
     if (pl.buf.length > 8) pl.buf.shift();
   }
@@ -2150,6 +2756,8 @@ function remoteFX(d) {
     if (pl) pl.shotT = .05;
   } else if (d.k === 'hitwall') {
     decal(new V3(d.o[0], d.o[1], d.o[2]), new V3(d.n[0], d.n[1], d.n[2]));
+  } else if (d.k === 'ab') {
+    onAbilityFX(d);
   }
 }
 function sendShot(o, e, w) { netSay({ t: 'fx', k: 'shot', id: ME.id, o: [o.x, o.y, o.z], e: [e.x, e.y, e.z], w }); }
@@ -2159,9 +2767,10 @@ const MODES = {
   duel: { name: '1v1 Duel', size: 1, desc: 'One on one. First to 7 rounds.' },
   double: { name: '2v2', size: 2, desc: 'Two on two. Trade with your partner and take the round. First to 7 rounds.' },
 };
-const WIN_ROUNDS = 7, ROUND_TIME = 90, FREEZE_TIME = 12, END_TIME = 4;
+const WIN_ROUNDS = 7, ROUND_TIME = 90, FREEZE_TIME = 5, END_TIME = 4;
 const G = {
   drops: [], toast: '', toastT: 0, boardT: 0, mode: 'duel', phase: 'menu', phaseT: 0, round: 0, shopOpen: false,
+  abilities: true, allowed: AGENT_IDS.slice(), smokes: [], zones: [], orbs: [], barriers: [],
   score: { A: 0, B: 0 }, time: 0, liveT: 0, roundKills: 0, over: false, paused: false,
   specTarget: null, specYaw: null, everLocked: false, noLock: false,
   stats: { kills: 0, deaths: 0, hits: 0, hs: 0, hsKills: 0, dmg: 0, shots: 0 },
@@ -2173,6 +2782,7 @@ function clearRoundFX() {
   for (const d of G.drops.slice()) removeDrop(d);
   decals.forEach(d => d.visible = false);
   H.feed.innerHTML = '';
+  clearAbilityFX();
 }
 // everyone respawns on their side's pads, weapons refilled
 function resetRound() {
@@ -2183,7 +2793,7 @@ function resetRound() {
     const list = SPAWNS[pl.team], i = (seat[pl.team] = (seat[pl.team] || 0)) ;
     seat[pl.team]++;
     const sp = list[i % list.length];
-    pl.hp = 100; pl.alive = true; pl.deathT = 0; pl.hitBy.clear(); pl.buf.length = 0;
+    pl.hp = 100; pl.alive = true; pl.deathT = 0; pl.hitBy.clear(); pl.buf.length = 0; pl.blind = false; pl.burn = 0;
     pl.pos.set(sp.x + rand(-.6, .6), 0, sp.z + rand(-.6, .6));
     pl.yaw = Math.atan2(-(0 - pl.pos.x), -(0 - pl.pos.z));
     if (pl.mesh) { pl.mesh.g.rotation.set(0, pl.yaw, 0); pl.mesh.g.position.set(pl.pos.x, 0, pl.pos.z); }
@@ -2223,6 +2833,7 @@ function timeExpired() {
   endRound(a === b ? (Math.random() < .5 ? 'A' : 'B') : a > b ? 'A' : 'B', 'Time expired');
 }
 function killedMe(by) {
+  if (P.rib) { ribReturn(); return; }   // Run It Back: the death still counts, you just come back
   P.alive = false; P.deathT = 0; ME.alive = false;
   G.stats.deaths++;
   canvas.classList.add('dead');
@@ -2258,7 +2869,9 @@ function advanceMatch(dt) {
 function pausedTick(dt) {
   if (!ME || !advanceMatch(dt)) return;
   if (P.alive) { placeCamera(); setFov(P.zoom, 1); }
-  updateRemotes(dt); updateBotBars(); updateDrops(); updateFX(dt);
+  updateRemotes(dt); updateBotBars(); updateDrops();
+  if (G.abilities) updateAbilities(dt);
+  updateFX(dt);
   netTick(); updateHUD(dt);
 }
 function update(dt) {
@@ -2268,6 +2881,7 @@ function update(dt) {
   updateRemotes(dt);
   updateBotBars();
   updateDrops();
+  if (G.abilities) updateAbilities(dt);
   updateFX(dt); updateVM(dt);
   netTick();
   updateHUD(dt);
@@ -2322,6 +2936,7 @@ function shopPick(id) {
   saveSettings();
   // hand it over straight away when there is a live player to hand it to
   if (P.alive) {
+    if (P.cur === 'ult') endBladeStorm();
     P.slots[slot] = id === 'none' ? null : newInst(id);
     P.cur = P.slots[slot] ? slot : P.slots.primary ? 'primary' : 'secondary';
     P.reloadT = 0; P.spray = 0; P.inspect = 0; P.zoom = 1; setFov(1, 1);
@@ -2396,6 +3011,10 @@ document.addEventListener('keydown', e => {
     case 'drop': dropOrPickup(); break;
     case 'inspect': startInspect(); break;
     case 'reload': startReload(); break;
+    case 'ab1': useAbility(0); break;
+    case 'ab2': useAbility(1); break;
+    case 'ab3': useAbility(2); break;
+    case 'ult': useAbility(3); break;
   }
 });
 document.addEventListener('keyup', e => { keys[e.code] = false; });
@@ -2408,16 +3027,17 @@ function syncMode() { syncSeg('modeSeg', settings.mode); $('modeDesc').textConte
 $('modeSeg').addEventListener('click', e => {
   const b = e.target.closest('button'); if (!b) return;
   settings.mode = b.dataset.v; syncMode(); saveSettings();
-  if (G.phase === 'lobby' && NET.host) { netBroadcast({ t: 'roster', roster: rosterMsg() }); renderLobby(); }
+  if (G.phase === 'lobby' && NET.host) { netBroadcast(rosterPacket()); renderLobby(); }
 });
 $('pname').addEventListener('input', e => {
   settings.name = e.target.value.slice(0, 14) || 'Player'; saveSettings();
-  if (ME) { ME.name = settings.name; if (NET.host) { netBroadcast({ t: 'roster', roster: rosterMsg() }); renderLobby(); } else netSend({ t: 'join', name: settings.name }); }
+  if (ME) { ME.name = settings.name; if (NET.host) { netBroadcast(rosterPacket()); renderLobby(); } else netSend({ t: 'join', name: settings.name, ag: myAgentId() }); }
 });
 
 function showLobby(code) {
   G.phase = 'lobby';
   $('setup').hidden = true; $('lobby').hidden = false;
+  $('menu').scrollTop = 0;                      // the invite link is the first thing you need here
   $('linkBox').value = roomLink(code);
   $('startMatch').hidden = !NET.host;
   renderLobby();
@@ -2428,11 +3048,78 @@ function renderLobby() {
   const list = [...players.values()];
   setText($('lobbyCount'), list.length + ' / ' + size);
   setHTML($('lobbyList'), list.map(pl =>
-    `<div class="lobbyrow ${pl.team.toLowerCase()}"><span>${pl.name}${pl === ME ? ' <span class="mute">(you)</span>' : ''}</span><span class="tag">TEAM ${pl.team}${pl.id === NET.id && NET.host ? ' · HOST' : ''}</span></div>`).join(''));
+    `<div class="lobbyrow ${pl.team.toLowerCase()}"><span>${pl.name}${pl === ME ? ' <span class="mute">(you)</span>' : ''}${G.abilities ? ' <span class="mute">· ' + (AGENTS[pl.agent] || AGENTS.jett).name.toUpperCase() + '</span>' : ''}</span><span class="tag">TEAM ${pl.team}${pl.id === NET.id && NET.host ? ' · HOST' : ''}</span></div>`).join(''));
   const ready = list.length === size;
   $('startMatch').disabled = !ready;
   $('startMatch').textContent = ready ? 'START MATCH' : `WAITING FOR ${size - list.length} MORE`;
+  renderAgentField();
 }
+/* ---------- character select ---------- */
+// Two host settings and one personal one, all in the menu and all editable in the lobby right up to
+// START MATCH: the host says whether agents are used at all and which of them are in play, and each
+// player picks their own agent out of whatever the host left open.
+function isHost() { return NET.host || !NET.up; }   // in the menu you are your own host; only a guest is locked out
+function renderAgentField() {
+  const host = isHost();
+  const on = host ? settings.abilities : G.abilities;
+  const allow = host ? settings.allowed : allowedIds();
+  $('agentField').classList.toggle('off', !on);
+  // is the whole system on?
+  syncSeg('abilSeg', on ? 'on' : 'off');
+  $('abilSeg').querySelectorAll('button').forEach(b => b.disabled = !host);
+  setText($('abNote'), !host ? (on ? 'The host is running agents this match.' : 'The host turned agents off — guns only.')
+    : on ? 'Abilities are on. Switch to GUNS ONLY for a pure gunfight — you can change this before every match.'
+    : 'Guns only: no abilities, no ultimates, for anyone.');
+  // which agents are in play
+  $('allowField').hidden = !on;
+  setHTML($('allowSeg'), AGENT_IDS.map(id =>
+    `<button data-v="${id}" aria-pressed="${allow.includes(id)}"${host ? '' : ' disabled'}>${AGENTS[id].name.toUpperCase()}</button>`).join(''));
+  setText($('alNote'), host
+    ? (allow.length === AGENT_IDS.length ? 'Every agent is in play. Switch one off to keep it out of the match — your call as host, and everyone picks from what is left.'
+      : `${allow.length} of ${AGENT_IDS.length} in play. Everyone in the match picks from these.`)
+    : 'The host chose which agents are in play. Pick any of the ones still lit.');
+  // and your own pick out of that list
+  const mine = myAgentId();
+  setHTML($('agentGrid'), AGENT_IDS.map(id => {
+    const a = AGENTS[id], open = allow.includes(id);
+    return `<button class="agcard${open ? '' : ' locked'}" data-v="${id}" aria-pressed="${open && id === mine}" style="--ac:${a.color}"${open ? '' : ' aria-disabled="true"'}><span class="sig">${a.name[0]}</span><small>${open ? a.role.toUpperCase() : 'LOCKED'}</small><b>${a.name.toUpperCase()}</b></button>`;
+  }).join(''));
+  const a = AGENTS[mine], keys = ['ab1', 'ab2', 'ab3', 'ult'];
+  const det = $('agDetail'); det.style.setProperty('--ac', a.color);
+  setHTML(det, `<p class="blurb">${a.blurb}</p><div class="abgrid">` + a.kit.map((k, i) =>
+    `<div class="abrow"><kbd>${K(keys[i])}</kbd><div><b>${k.name}<em>${i < 3 ? (k.max > 1 ? k.max + ' CHARGES' : '1 CHARGE') : 'ULTIMATE · ' + a.ultCost + ' PTS'}</em></b><span>${k.desc}</span></div></div>`).join('') + '</div>');
+}
+// tell everyone what you are playing now (and, if you are the host, what the match settings are)
+function pushAgentChange() {
+  if (!ME) return;
+  ME.agent = myAgentId();
+  if (NET.host) { netBroadcast(rosterPacket()); renderLobby(); }
+  else netSend({ t: 'join', name: settings.name, ag: myAgentId() });
+}
+$('agentGrid').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  if (b.classList.contains('locked')) { setText($('alNote'), `${AGENTS[b.dataset.v].name} is locked out of this match.`); return; }
+  settings.agent = b.dataset.v; saveSettings();
+  pushAgentChange();
+  renderAgentField();
+});
+$('allowSeg').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b || b.disabled) return;
+  const id = b.dataset.v, has = settings.allowed.includes(id);
+  if (has && settings.allowed.length === 1) { setText($('alNote'), 'At least one agent has to stay in play.'); return; }
+  settings.allowed = has ? settings.allowed.filter(x => x !== id) : AGENT_IDS.filter(x => x === id || settings.allowed.includes(x));
+  saveSettings();
+  G.allowed = settings.allowed.slice();
+  pushAgentChange();
+  renderAgentField();
+});
+$('abilSeg').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b || b.disabled) return;
+  settings.abilities = b.dataset.v === 'on'; saveSettings();
+  G.abilities = settings.abilities;
+  if (NET.host) netBroadcast(rosterPacket());
+  renderAgentField();
+});
 $('create').onclick = () => { initAudio(); hostMatch(); };
 $('join').onclick = () => { initAudio(); joinMatch($('joinCode').value); };
 $('joinCode').addEventListener('keydown', e => { if (e.code === 'Enter') $('join').click(); });
@@ -2449,14 +3136,15 @@ $('startMatch').onclick = () => {
   // balance the sides before anyone loads in
   let i = 0;
   for (const pl of players.values()) pl.team = (i++ % 2) ? 'B' : 'A';
-  netBroadcast({ t: 'start', mode: settings.mode, map, roster: rosterMsg() });
-  G.mode = settings.mode;
+  netBroadcast({ t: 'start', mode: settings.mode, map, roster: rosterMsg(), ab: settings.abilities, al: settings.allowed });
+  G.mode = settings.mode; G.abilities = settings.abilities; G.allowed = settings.allowed.slice();
   buildMap(map); beginMatch(true);
 };
 // everything both sides do when the match opens
 function beginMatch(isHost) {
   refreshAvatars();
   G.score = { A: 0, B: 0 }; G.round = 0; G.over = false;
+  P.ult = 0;
   G.stats = { kills: 0, deaths: 0, hits: 0, hs: 0, hsKills: 0, dmg: 0, shots: 0 };
   for (const pl of players.values()) { pl.k = 0; pl.d = 0; }
   $('menu').hidden = true; $('over').hidden = true; H.hud.hidden = false;
@@ -2474,8 +3162,11 @@ function resetLocalForRound() {
   P.slots = { primary: settings.loadout === 'none' ? null : newInst(settings.loadout), secondary: newInst(settings.sidearm || 'pistol'), melee: newInst('knife') };
   P.cur = P.slots.primary ? 'primary' : 'secondary';
   P.reloadT = 0; P.switchT = 0; P.recP = P.recY = 0; P.spray = 0;
+  P.abil = curAgent().kit.slice(0, 3).map(k => k.max);
+  P.slow = false; P.stim = false; P.dashT = 0;
   canvas.classList.remove('dead');
   clearRoundFX();
+  addUlt(1);   // one ult point for turning up
   VM.set(P.slots[P.cur].id);
   P.zoom = 1; setFov(1, 1); placeCamera();
 }
@@ -2484,6 +3175,8 @@ function toMenu() {
   $('over').hidden = true; $('pause').hidden = true; $('controls').hidden = true; $('xhPanel').hidden = true;
   H.hud.hidden = true; $('menu').hidden = false;
   $('setup').hidden = false; $('lobby').hidden = true;
+  $('menu').scrollTop = 0;
+  G.abilities = settings.abilities; G.allowed = settings.allowed.slice(); renderAgentField();
   unlock(); canvas.classList.remove('dead');
   buildMap(randomMapId());
 }
@@ -2517,6 +3210,7 @@ function renderKeyList() {
     [K('jump'), 'Jump'], [K('crouch'), 'Crouch'], ['LMB', 'Fire'], ['RMB', 'Aim / scope'],
     [K('reload'), 'Reload'], [[K('primary'), K('secondary'), K('melee')].join(' '), 'Weapons'],
     [K('drop'), 'Drop / pick up gun'], [K('buy'), 'Armory (free)'], [K('inspect'), 'Inspect knife'],
+    [[K('ab1'), K('ab2'), K('ab3')].join(' '), 'Abilities'], [K('ult'), 'Ultimate'],
     [K('score'), 'Scoreboard'], ['ESC', 'Pause · settings'],
   ];
   $('keyList').innerHTML = rows.map(([k, l]) => `<kbd>${k}</kbd><span>${l}</span>`).join('');

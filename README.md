@@ -3,12 +3,13 @@
 An online 1v1 / 2v2 browser shooter. No install, no server to run: open the page,
 create a match, send the link, play.
 
-Built on the engine from Project Valorant — same movement, weapons, hitscan and
-viewmodel — with the bots and the spike replaced by real players over the network.
+Built on the engine from Project Valorant — same movement, weapons, hitscan,
+viewmodel and agents — with the bots and the spike replaced by real players over
+the network.
 
 ## Playing
 
-1. Open the page and pick a name and a mode (1v1 or 2v2).
+1. Open the page and pick a name, a mode (1v1 or 2v2) and an agent.
 2. **CREATE MATCH** opens a room and gives you an invite link.
 3. Send that link to whoever is playing. They open it and press **JOIN**.
 4. When the lobby is full, the host presses **START MATCH**.
@@ -16,11 +17,48 @@ viewmodel — with the bots and the spike replaced by real players over the netw
 First side to 7 rounds wins. A round ends when one side is wiped out, or the
 90-second clock runs out.
 
+## Agents
+
+Four agents, each with three abilities and an ultimate, carried over from Project
+Valorant: **Jett**, **Phoenix**, **Sage** and **Brimstone**. Character select is
+in the lobby, once you have created or joined a match: everyone picks their own
+agent under **YOUR AGENT** and can change it right up until START MATCH.
+
+Abilities are on **Q / E / Z**, the ultimate on **X**. The three ability charges
+refill at the start of every round. The ultimate is charged by points — one for a
+kill, one for dying, one for each round you turn up to — and the cost is shown on
+the agent card. Abilities are locked during the pre-round countdown, except the
+two that only move you (Updraft and Tailwind).
+
+Smokes, fires, flashes and walls all appear for everyone: the ability runs on the
+caster's machine and is relayed to the other players, so the same cloud lands in
+the same place on every screen. Whether a flash blinded you is worked out by your
+own browser from where you were looking, for the same reason hits are decided by
+the shooter.
+
+Two abilities need a teammate and so only do anything in 2v2: Sage's
+**RESURRECTION**, and healing someone other than yourself.
+
+### What the host controls
+
+Two of the three character-select settings belong to the host, and both sit in
+the lobby next to the agent cards, changeable before every match. Guests see them
+but cannot touch them.
+
+- **AGENTS ALLOWED** — which agents are in play. Switch one off and it is locked
+  out of the match: its card greys out for everybody and nobody can pick it. At
+  least one has to stay in. Your own preference is remembered while an agent is
+  locked, so it comes straight back if the host reopens it, and a guest who is
+  already on a locked agent is moved to the first one still in play.
+- **AGENTS THIS MATCH** — whether agents are used at all. Switch to **GUNS ONLY**
+  and nobody gets abilities or an ultimate for that match; the ability bar
+  disappears and it is a pure gunfight.
+
 ## Guns
 
 There is no loadout to choose before the match and nothing to pay for. Press
 **B** for the armory and take whatever you want: every weapon is free. It opens
-during the twelve seconds before a round, between rounds, and any time you are
+during the five seconds before a round, between rounds, and any time you are
 waiting to respawn — not while you are alive and the round is live. What you
 pick stays yours for the rest of the match and is re-issued every round.
 
@@ -28,7 +66,17 @@ pick stays yours for the rest of the match and is re-issued every round.
 
 WASD move · Shift walk · C crouch · Space jump · LMB fire · RMB aim · R reload
 · 1/2/3 weapons · G drop or pick up a gun · B armory · Y inspect the knife
-· Tab scoreboard · Esc pause. Everything is rebindable under CONTROLS.
+· **Q/E/Z abilities · X ultimate** · Tab scoreboard · Esc pause. Everything is
+rebindable under CONTROLS.
+
+## The arenas
+
+Two small symmetric maps, **Crossfire** and **Lantern**. Both are built wide on
+purpose: long lanes, cover low enough to shoot over, and at least one planked
+wooden wall on every main sightline, so an angle someone is holding can always be
+answered through the wall. Planks and brown crates are thin enough for a bullet
+(a shot keeps a share of its damage per wall, up to two walls); concrete, pillars
+and the teal metal crates stop it.
 
 ## How the networking works
 
@@ -42,6 +90,9 @@ keep running.
 - Guests hold one connection up to the host and send their position 20 times a
   second. Remote players are drawn ~100 ms in the past and interpolated, which is
   what keeps other players moving smoothly between packets.
+- **Abilities are owned by the caster.** The player who threw it decides where it
+  landed and reports the burn damage; healing and resurrection are confirmed by
+  the host, the same as a gunshot, so nobody's health can be changed twice.
 - **Hits are decided by the shooter.** Your client does the raycast and tells the
   host what it hit. That is why you never have to lead your shots to compensate
   for someone else's ping — and it is also the reason this is a game for people
