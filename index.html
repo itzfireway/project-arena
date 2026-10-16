@@ -92,6 +92,15 @@
   .kf .hs{font-size:10px;letter-spacing:.1em;border:1px solid var(--gold);color:var(--gold);padding:0 4px;}
   @keyframes kfin{from{transform:translateX(20px);opacity:0}to{transform:none;opacity:1}}
 
+  #chat{position:absolute;left:24px;bottom:120px;width:min(380px,40vw);display:flex;flex-direction:column;gap:4px;align-items:flex-start;font-family:var(--display);font-size:13px;}
+  #chatLog{display:flex;flex-direction:column;gap:3px;align-items:flex-start;}
+  .cm{background:var(--panel);padding:3px 9px;max-width:100%;animation:kfin .2s ease-out;word-break:break-word;}
+  .cm .n{font-weight:700;letter-spacing:.06em;} .cm .n.t{color:var(--teal);} .cm .n.r{color:var(--red);}
+  .cm .x{color:#e7eef6;margin-left:7px;}
+  #chatBar{display:flex;align-items:center;gap:8px;background:rgba(10,14,19,.9);border:1px solid var(--teal);padding:4px 9px;pointer-events:auto;width:100%;}
+  #chatBar .lbl{font-size:11px;letter-spacing:.16em;color:var(--teal);font-weight:700;}
+  #chatIn{flex:1;background:none;border:0;outline:0;color:#e7eef6;font-family:var(--display);font-size:13px;letter-spacing:.03em;min-width:0;}
+
   #vitals{position:absolute;left:24px;bottom:22px;display:flex;align-items:flex-end;gap:18px;font-family:var(--display);}
   .hpbox{background:var(--panel);padding:8px 14px 10px;min-width:150px;}
   .hprow{display:flex;align-items:baseline;gap:10px;}
@@ -346,6 +355,7 @@
     </div>
     <div id="feed"></div>
     <div id="ping">—</div>
+    <div id="chat"><div id="chatLog"></div><div id="chatBar" hidden><span class="lbl">SAY</span><input id="chatIn" maxlength="100" autocomplete="off" autocorrect="off" spellcheck="false"></div></div>
     <div id="vitals">
       <div class="hpbox">
         <div class="hprow"><span id="hp">100</span></div>
@@ -396,6 +406,10 @@
           </div>
         </div>
         <div class="field">
+          <span class="lbl" id="soundSegLbl">Sound</span>
+          <div class="seg" id="soundSeg" role="group" aria-labelledby="soundSegLbl"><button data-v="on">ON</button><button data-v="off">OFF</button></div>
+        </div>
+        <div class="field">
           <label for="sens">Mouse sensitivity</label>
           <div class="range"><input type="range" id="sens" min="0.1" max="3" step="0.05" value="1"><output id="sensOut">1.00</output></div>
         </div>
@@ -443,7 +457,7 @@
       <div id="netStatus"></div>
       <div class="row"><button class="ghost" id="menuControls">CONTROLS</button><button class="ghost" id="menuXh">CROSSHAIR</button></div>
       <div class="keys" id="keyList"></div>
-      <p class="tip">Tip: <b>planked wooden walls</b> and <b>brown crates</b> are thin enough to shoot through — every main lane has one. Concrete and teal metal crates stop bullets.</p>
+      <p class="tip">Tip: <b>planked wooden walls</b> and <b>brown crates</b> are thin enough to shoot through. Concrete and teal metal crates stop bullets.</p>
       <div class="note" id="touchNote" hidden>Project Arena needs a keyboard and mouse.</div>
       <div class="credits">
         <div class="crow"><span>LAST UPDATED</span><b id="buildDate">—</b></div>
@@ -455,6 +469,10 @@
   <div class="overlay" id="pause" hidden>
     <div class="card">
       <h2>PAUSED</h2>
+      <div class="field">
+        <span class="lbl" id="soundSeg2Lbl">Sound</span>
+        <div class="seg" id="soundSeg2" role="group" aria-labelledby="soundSeg2Lbl"><button data-v="on">ON</button><button data-v="off">OFF</button></div>
+      </div>
       <div class="field">
         <label for="sens2">Mouse sensitivity</label>
         <div class="range"><input type="range" id="sens2" min="0.1" max="3" step="0.05" value="1"><output id="sensOut2">1.00</output></div>
@@ -532,14 +550,14 @@ const ACTIONS = [
   ['primary', 'Primary weapon', 'Digit1'], ['secondary', 'Sidearm', 'Digit2'], ['melee', 'Karambit', 'Digit3'],
   ['drop', 'Drop / pick up gun', 'KeyG'], ['inspect', 'Inspect knife', 'KeyY'], ['buy', 'Weapon shop', 'KeyB'],
   ['ab1', 'Ability 1', 'KeyQ'], ['ab2', 'Signature ability', 'KeyE'], ['ab3', 'Ability 3', 'KeyZ'], ['ult', 'Ultimate', 'KeyX'],
-  ['score', 'Scoreboard (hold)', 'Tab'],
+  ['score', 'Scoreboard (hold)', 'Tab'], ['chat', 'Chat', 'Enter'],
 ];
 const DEFAULT_BINDS = Object.fromEntries(ACTIONS.map(a => [a[0], a[2]]));
 // bump this when you ship a change
-const BUILD = { date: '22 SEP 2026', by: 'ITZFIREWAY' };
+const BUILD = { date: '24 SEP 2026', by: 'ITZFIREWAY' };
 const ROOM_HINT = 'Share your link and play from anywhere.';
 const XH_DEFAULT = { color: '#8dffd8', len: 6, th: 2, gap: 3, dot: true, dotSize: 2, lines: true, outline: true, dynamic: true, alpha: 1 };
-const settings = { name: '', mode: 'duel', loadout: 'tempest', sidearm: 'pistol', sens: 1, agent: 'jett', abilities: true, allowed: null };
+const settings = { name: '', mode: 'duel', loadout: 'tempest', sidearm: 'pistol', sound: true, sens: 1, agent: 'jett', abilities: true, allowed: null };
 if (!settings.name) settings.name = 'Player' + (100 + Math.floor(Math.random() * 900));
 try { Object.assign(settings, JSON.parse(localStorage.getItem('project-arena') || '{}')); } catch (e) {}
 delete settings.map; delete settings.diff; delete settings.bots; delete settings.mates;
@@ -700,40 +718,39 @@ const spikeLight = new THREE.PointLight(0xff3b4f, 0, 7, 2); scene.add(spikeLight
 // Small symmetric maps built for 1v1 and 2v2: two spawns facing each other across cover,
 // no sites and no bots, so a map is just boxes + spawn points + how big the arena is.
 // boxes are [centreX, centreZ, width, depth, height, material]; 'thin' planks and 'crateB' wood shoot through.
-// Both arenas are deliberately airy: wide lanes, low cover you can shoot over, and at least one
-// planked wall on every main sightline so a held angle can always be answered through the wall.
 const MAPS = {
   crossfire: {
-    name: 'Crossfire', sub: 'Open box · long sightline down the middle, planked centre',
-    half: { x: 30, z: 22 },
+    name: 'Crossfire', sub: 'Tight box · long sightline down the middle',
+    half: { x: 26, z: 20 },
     boxes: [
-      [0, 0, 3, 8, 6, 'thin'],                                          // the centre wall shoots through
-      [-13, -7, 7, 2, 3.2, 'wall'], [13, 7, 7, 2, 3.2, 'wall'],         // low enough to shoot over
-      [-13, 9, 2, 7, 6, 'thin'], [13, -9, 2, 7, 6, 'thin'],
-      [-21, -3, 2, 2, 3, 'pillar'], [21, 3, 2, 2, 3, 'pillar'],
-      [-7, 14, 2.4, 2.4, 2.4, 'crateB'], [7, -14, 2.4, 2.4, 2.4, 'crateB'],
-      [-22, 14, 3, 3, 1, 'crateA'], [22, -14, 3, 3, 1, 'crateA'],
-      [0, 17, 5, 2, 1, 'crateA'], [0, -17, 5, 2, 1, 'crateA'],
-      [-9, 0, 2, 2, 1, 'crateA'], [9, 0, 2, 2, 1, 'crateA'],
+      [0, 0, 4, 10, 6, 'wall'],
+      [-12, -6, 8, 2, 6, 'wall'], [12, 6, 8, 2, 6, 'wall'],
+      [-12, 8, 2, 8, 6, 'thin'], [12, -8, 2, 8, 6, 'thin'],
+      [-19, -2, 2, 2, 3, 'pillar'], [19, 2, 2, 2, 3, 'pillar'],
+      [-6, 12, 2.4, 2.4, 2.4, 'crateB'], [6, -12, 2.4, 2.4, 2.4, 'crateB'],
+      [-20, 12, 3, 3, 1, 'crateA'], [20, -12, 3, 3, 1, 'crateA'],
+      [-20, -13, 2, 2, 1.6, 'crateB'], [20, 13, 2, 2, 1.6, 'crateB'],
+      [0, 15, 5, 2, 1, 'crateA'], [0, -15, 5, 2, 1, 'crateA'],
+      [-8, 0, 2, 2, 1, 'crateA'], [8, 0, 2, 2, 1, 'crateA'],
     ],
-    spawns: { A: [{ x: -26, z: 17 }, { x: -26, z: 12 }], B: [{ x: 26, z: -17 }, { x: 26, z: -12 }] },
+    spawns: { A: [{ x: -22, z: 15 }, { x: -22, z: 10 }], B: [{ x: 22, z: -15 }, { x: 22, z: -10 }] },
   },
   lantern: {
-    name: 'Lantern', sub: 'Wide hall with two flanking lanes you can shoot into',
-    half: { x: 32, z: 21 },
+    name: 'Lantern', sub: 'Central hall with two flanking lanes',
+    half: { x: 28, z: 18 },
     boxes: [
-      [0, 0, 9, 5, 2.6, 'thin'],                                        // centre block: low enough to peek over, thin enough to shoot through
-      [-10, -11, 2, 11, 6, 'wall'], [10, 11, 2, 11, 6, 'wall'],
-      [-10, 11, 2, 11, 6, 'thin'], [10, -11, 2, 11, 6, 'thin'],         // the flank walls are planks
-      [0, -16, 10, 2, 6, 'thin'], [0, 16, 10, 2, 6, 'thin'],
-      [-20, 0, 2, 9, 6, 'wall'], [20, 0, 2, 9, 6, 'wall'],
-      [-26, -10, 3, 3, 1, 'crateA'], [26, 10, 3, 3, 1, 'crateA'],
-      [-26, 10, 2.4, 2.4, 2.4, 'crateB'], [26, -10, 2.4, 2.4, 2.4, 'crateB'],
-      [-15, 6, 2, 2, 1, 'crateA'], [15, -6, 2, 2, 1, 'crateA'],
-      [-5, -8, 2, 2, 1.6, 'crateB'], [5, 8, 2, 2, 1.6, 'crateB'],
-      [-14, -4, 2, 2, 3, 'pillar'], [14, 4, 2, 2, 3, 'pillar'],
+      [0, 0, 10, 6, 3, 'wall'],
+      [-9, -10, 2, 14, 6, 'wall'], [9, 10, 2, 14, 6, 'wall'],
+      [-9, 10, 2, 14, 6, 'wall'], [9, -10, 2, 14, 6, 'wall'],
+      [0, -14, 12, 2, 6, 'thin'], [0, 14, 12, 2, 6, 'thin'],
+      [-18, 0, 2, 12, 6, 'wall'], [18, 0, 2, 12, 6, 'wall'],
+      [-23, -9, 3, 3, 1, 'crateA'], [23, 9, 3, 3, 1, 'crateA'],
+      [-23, 9, 2.4, 2.4, 2.4, 'crateB'], [23, -9, 2.4, 2.4, 2.4, 'crateB'],
+      [-14, 5, 2, 2, 1, 'crateA'], [14, -5, 2, 2, 1, 'crateA'],
+      [-4, -7, 2, 2, 1.6, 'crateB'], [4, 7, 2, 2, 1.6, 'crateB'],
+      [-13, -4, 2, 2, 3, 'pillar'], [13, 4, 2, 2, 3, 'pillar'],
     ],
-    spawns: { A: [{ x: -29, z: 0 }, { x: -29, z: 6 }], B: [{ x: 29, z: 0 }, { x: 29, z: -6 }] },
+    spawns: { A: [{ x: -25, z: 0 }, { x: -25, z: 5 }], B: [{ x: 25, z: 0 }, { x: 25, z: -5 }] },
   },
 };
 const MAP_IDS = Object.keys(MAPS);
@@ -851,7 +868,7 @@ function initAudio() {
   if (AC) { if (AC.state === 'suspended') AC.resume(); return; }
   try {
     AC = new (window.AudioContext || window.webkitAudioContext)();
-    master = AC.createGain(); master.gain.value = .45; master.connect(AC.destination);
+    master = AC.createGain(); master.gain.value = settings.sound ? .45 : 0; master.connect(AC.destination);
     noiseBuf = AC.createBuffer(1, AC.sampleRate, AC.sampleRate);
     const d = noiseBuf.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
   } catch (e) { AC = null; }
@@ -2345,6 +2362,7 @@ const H = {
   abilRow: $('abilRow'), ab: [0, 1, 2, 3].map(i => $('ab' + i)), abK: [0, 1, 2, 3].map(i => $('ab' + i).querySelector('.k')),
   abN: [0, 1, 2, 3].map(i => $('ab' + i).querySelector('.n')), rib: $('ribTag'), stim: $('stimTag'), ribfx: $('ribfx'), healfx: $('healfx'),
   board: $('board'), boardBody: $('boardBody'), boardHead: $('boardHead'),
+  chatLog: $('chatLog'), chatBar: $('chatBar'), chatIn: $('chatIn'),
   mm: $('minimap'), banner: $('banner'), bBig: $('bannerBig'), bSub: $('bannerSub'), kb: $('killbanner'), kbChev: $('kbChev'), kbTxt: $('kbTxt'),
 };
 let hitT = 0, bannerT = 0;
@@ -2375,6 +2393,38 @@ function feedMsg(who, msg, ally = false) {
   H.feed.prepend(el); setTimeout(() => el.remove(), 5000);
   while (H.feed.children.length > 5) H.feed.lastChild.remove();
 }
+/* ---------- chat ---------- */
+// Messages go out the same way a gunshot does: a guest sends it up to the host, who stamps it with
+// the name and team it really came from and relays it on, so nobody can talk as someone else.
+const esc = t => t.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+function addChat(m) {
+  const ally = ME && m.tm === ME.team;
+  const el = document.createElement('div'); el.className = 'cm';
+  el.innerHTML = `<span class="n ${ally ? 't' : 'r'}">${esc(m.name)}</span><span class="x">${esc(m.txt)}</span>`;
+  H.chatLog.appendChild(el);
+  setTimeout(() => el.remove(), 14000);
+  while (H.chatLog.children.length > 6) H.chatLog.firstChild.remove();
+}
+function openChat() {
+  if (G.chatOpen || !inPlay() || G.paused || G.shopOpen) return;
+  G.chatOpen = true;
+  for (const k in keys) keys[k] = false;
+  mouseDown = false; rmb = false;
+  H.chatBar.hidden = false; H.chatIn.value = ''; H.chatIn.focus();
+}
+function closeChat() {
+  if (!G.chatOpen) return;
+  G.chatOpen = false; H.chatBar.hidden = true; H.chatIn.value = ''; H.chatIn.blur();
+}
+function sendChat() {
+  const txt = H.chatIn.value.trim().slice(0, 100);
+  closeChat();
+  if (!txt || !ME) return;
+  const m = { t: 'chat', id: ME.id, name: ME.name, tm: ME.team, txt };
+  addChat(m);
+  netSay(m);
+}
+
 // bot-on-bot kills
 function feedLine(a, aAlly, weapon, hs, v, vAlly) {
   const el = document.createElement('div'); el.className = 'kf';
@@ -2646,6 +2696,14 @@ function onHostData(conn, d) {
       netBroadcast(d, conn.peer);
       remoteFX(d);
       break;
+    case 'chat': {
+      if (!pl) return;
+      const txt = String(d.txt || '').trim().slice(0, 100);
+      if (!txt) return;
+      const m = { t: 'chat', id: pl.id, name: pl.name, tm: pl.team, txt };
+      netBroadcast(m, conn.peer); addChat(m);
+      break;
+    }
     case 'ping': conn.send({ t: 'pong', s: d.s }); break;
   }
 }
@@ -2684,6 +2742,7 @@ function onGuestData(d) {
     case 'heal': applyHeal(d.to, d.amt); break;
     case 'res': applyRevive(d.to); break;
     case 'fx': remoteFX(d); break;
+    case 'chat': addChat(d); break;
     case 'pong': NET.ping = Math.round((now() - d.s) * 1000); break;
   }
 }
@@ -2772,7 +2831,7 @@ const G = {
   drops: [], toast: '', toastT: 0, boardT: 0, mode: 'duel', phase: 'menu', phaseT: 0, round: 0, shopOpen: false,
   abilities: true, allowed: AGENT_IDS.slice(), smokes: [], zones: [], orbs: [], barriers: [],
   score: { A: 0, B: 0 }, time: 0, liveT: 0, roundKills: 0, over: false, paused: false,
-  specTarget: null, specYaw: null, everLocked: false, noLock: false,
+  specTarget: null, specYaw: null, everLocked: false, noLock: false, chatOpen: false,
   stats: { kills: 0, deaths: 0, hits: 0, hs: 0, hsKills: 0, dmg: 0, shots: 0 },
 };
 const now = () => performance.now() / 1000;
@@ -2841,7 +2900,7 @@ function killedMe(by) {
   G.specTarget = null; G.specYaw = null;
 }
 function showOver() {
-  G.phase = 'over'; unlock();
+  closeChat(); G.phase = 'over'; unlock();
   const won = G.score[ME.team] > G.score[ME.team === 'A' ? 'B' : 'A'], st = G.stats;
   $('overTitle').textContent = won ? 'VICTORY' : 'DEFEAT';
   $('overTitle').className = won ? 'win' : 'lose';
@@ -2946,6 +3005,7 @@ function shopPick(id) {
 }
 function openShop() {
   if (!canShop() || G.shopOpen) return;
+  closeChat();
   G.shopOpen = true; mouseDown = false; rmb = false; renderShop(); $('shop').hidden = false;
   if (document.pointerLockElement) document.exitPointerLock();
 }
@@ -2959,7 +3019,7 @@ document.addEventListener('pointerlockerror', () => {
   if (G.everLocked) { if (inPlay()) pause(); return; }
   G.noLock = true; $('lockNote').hidden = false; if (inPlay()) { G.paused = false; $('pause').hidden = true; }
 });
-function pause() { G.paused = true; mouseDown = false; rmb = false; for (const k in keys) keys[k] = false; $('sens2').value = settings.sens; $('sensOut2').textContent = (+settings.sens).toFixed(2); $('pause').hidden = false; }
+function pause() { closeChat(); G.paused = true; mouseDown = false; rmb = false; for (const k in keys) keys[k] = false; $('sens2').value = settings.sens; $('sensOut2').textContent = (+settings.sens).toFixed(2); $('pause').hidden = false; }
 function resume() { $('pause').hidden = true; G.paused = false; initAudio(); lock(); }
 document.addEventListener('mousemove', e => {
   if (!inPlay() || G.paused || G.shopOpen || !P.alive) return;
@@ -2996,6 +3056,7 @@ document.addEventListener('keydown', e => {
 document.addEventListener('keydown', e => {
   if (PANELS.some(id => !$(id).hidden)) { if (e.code === 'Escape') closePanel(); return; }
   if (!inPlay()) return;
+  if (G.chatOpen) return; // the chat bar has the keyboard; it handles Enter and Escape itself
   if (actionOf(e.code) || e.code === 'Tab' || e.ctrlKey) e.preventDefault();
   if (G.shopOpen) { if (e.code === settings.binds.buy || e.code === 'Escape') closeShop(); return; }
   if (G.paused) { if (e.code === 'Escape') resume(); return; }
@@ -3003,6 +3064,7 @@ document.addEventListener('keydown', e => {
   if (e.repeat) { keys[e.code] = true; return; }
   keys[e.code] = true;
   if (actionOf(e.code) === 'buy') { openShop(); return; }
+  if (actionOf(e.code) === 'chat') { openChat(); return; } // you can talk while you are waiting to respawn
   if (!P.alive) return;
   switch (actionOf(e.code)) {
     case 'primary': switchTo('primary'); break;
@@ -3018,6 +3080,12 @@ document.addEventListener('keydown', e => {
   }
 });
 document.addEventListener('keyup', e => { keys[e.code] = false; });
+// typing keeps the pointer lock, so closing the bar drops you straight back into the round
+H.chatIn.addEventListener('keydown', e => {
+  e.stopPropagation();
+  if (e.code === 'Enter' || e.code === 'NumpadEnter') { e.preventDefault(); sendChat(); }
+  else if (e.code === 'Escape') { e.preventDefault(); closeChat(); }
+});
 window.addEventListener('blur', () => { for (const k in keys) keys[k] = false; mouseDown = false; rmb = false; });
 window.addEventListener('beforeunload', e => { if (inPlay() && G.phase !== 'end') { e.preventDefault(); e.returnValue = ''; } });
 
@@ -3272,6 +3340,12 @@ renderKeyList(); syncMode();
 $('pname').value = settings.name;
 function bindSens(inp, outEl) { inp.addEventListener('input', () => { settings.sens = +inp.value; outEl.textContent = (+inp.value).toFixed(2); saveSettings(); }); }
 bindSens($('sens'), $('sensOut')); bindSens($('sens2'), $('sensOut2'));
+function setSound(on) {
+  settings.sound = on; saveSettings(); syncSeg('soundSeg', on ? 'on' : 'off'); syncSeg('soundSeg2', on ? 'on' : 'off');
+  if (master) master.gain.setValueAtTime(on ? .45 : 0, AC.currentTime);
+}
+for (const id of ['soundSeg', 'soundSeg2']) $(id).addEventListener('click', e => { const b = e.target.closest('button'); if (b) setSound(b.dataset.v === 'on'); });
+syncSeg('soundSeg', settings.sound ? 'on' : 'off'); syncSeg('soundSeg2', settings.sound ? 'on' : 'off');
 $('sens').value = settings.sens; $('sensOut').textContent = (+settings.sens).toFixed(2);
 $('resume').onclick = resume;
 $('quit').onclick = () => { $('pause').hidden = true; leaveMatch(''); };

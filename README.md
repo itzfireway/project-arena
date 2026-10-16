@@ -66,17 +66,27 @@ pick stays yours for the rest of the match and is re-issued every round.
 
 WASD move · Shift walk · C crouch · Space jump · LMB fire · RMB aim · R reload
 · 1/2/3 weapons · G drop or pick up a gun · B armory · Y inspect the knife
-· **Q/E/Z abilities · X ultimate** · Tab scoreboard · Esc pause. Everything is
+· **Q/E/Z abilities · X ultimate** · **Enter chat** · Tab scoreboard · Esc pause. Everything is
 rebindable under CONTROLS.
+
+## Talking to each other
+
+Press **Enter** during a match and a **SAY** bar opens at the bottom of the screen.
+Type, press Enter again to send it to everyone, or Escape to throw it away. The bar
+holds on to the keyboard while it is open, so WASD types rather than moves, and you
+keep your mouse look the whole time — no pause, no lost round. You can talk while you
+are waiting to respawn. Messages show for a few seconds above your health, teammates
+in teal and the other side in red, and the key is rebindable under CONTROLS.
+
+A guest's message goes up to the host, who stamps it with the name and team it
+actually came from before relaying it, so nobody can talk as somebody else.
 
 ## The arenas
 
-Two small symmetric maps, **Crossfire** and **Lantern**. Both are built wide on
-purpose: long lanes, cover low enough to shoot over, and at least one planked
-wooden wall on every main sightline, so an angle someone is holding can always be
-answered through the wall. Planks and brown crates are thin enough for a bullet
-(a shot keeps a share of its damage per wall, up to two walls); concrete, pillars
-and the teal metal crates stop it.
+Two small, tight symmetric maps: **Crossfire**, a box with a long sightline down
+the middle, and **Lantern**, a central hall with two flanking lanes. Planks and
+brown crates are thin enough for a bullet (a shot keeps a share of its damage per
+wall, up to two walls); concrete, pillars and the teal metal crates stop it.
 
 ## How the networking works
 
