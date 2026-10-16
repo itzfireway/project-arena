@@ -1123,7 +1123,7 @@ const NET_LAG = .1;
 function makePlayer(id, name, team) {
   return {
     id, name, team, hp: 100, alive: true, k: 0, d: 0, dmg: 0, pos: new V3(), yaw: Math.PI, pitch: 0, agent: 'jett', blind: false, burn: 0,
-    low: false, moving: 0, weapon: 'pistol', mesh: null, buf: [], hitBy: new Map(), walk: 0, deathT: 0, shotT: 0,
+    low: false, moving: 0, weapon: 'pistol', mesh: null, buf: [], hitBy: new Map(), walk: 0, deathT: 0, shotT: 0, spd: 0, stepD: 0,
   };
 }
 // avatars are coloured by whether they are on your side, so they are rebuilt if teams change
@@ -1178,6 +1178,15 @@ function updateRemotes(dt) {
     m.g.rotation.set(0, pl.yaw, 0);
     m.body.scale.y = pl.low ? .78 : 1;
     pl.walk += pl.moving * dt * 1.7;
+    // footsteps: running is heard, walking (Shift) and crouching are silent, enemies louder than teammates
+    pl.spd = lerp(pl.spd, pl.moving, Math.min(1, dt * 8));
+    if (pl.spd > 4.8 && !pl.low) {
+      pl.stepD += pl.moving * dt;
+      if (pl.stepD > 2.4) {
+        pl.stepD = 0;
+        const s = spatial(pl.pos.x, pl.pos.z); if (s.d < 22 && P.alive) SFX.step(clamp(1 - s.d / 22, 0, 1) * (pl.team === ME.team ? .6 : 1.3), s.pan);
+      }
+    }
     const sw = Math.sin(pl.walk) * Math.min(1, pl.moving / 5) * .5;
     m.legL.rotation.x = sw; m.legR.rotation.x = -sw;
     m.gun.rotation.x = clamp(-pl.pitch, -.8, .8);
@@ -2811,7 +2820,7 @@ function remoteFX(d) {
   if (d.k === 'shot') {
     tracer(new V3(d.o[0], d.o[1], d.o[2]), new V3(d.e[0], d.e[1], d.e[2]), 0xffe0a0);
     const s = spatial(d.o[0], d.o[2]);
-    sfxShot(WEAPONS[d.w] ? WEAPONS[d.w].snd : 'rifle', s.vol, s.pan, Math.hypot(d.o[0] - P.pos.x, d.o[2] - P.pos.z));
+    sfxShot(WEAPONS[d.w] ? WEAPONS[d.w].snd : 'rifle', s.vol, s.pan, s.far);
     if (pl) pl.shotT = .05;
   } else if (d.k === 'hitwall') {
     decal(new V3(d.o[0], d.o[1], d.o[2]), new V3(d.n[0], d.n[1], d.n[2]));
