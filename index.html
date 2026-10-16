@@ -2466,18 +2466,32 @@ function buildMinimapBase() {
   }
 }
 const MX = x => MMOX + x * MMS, MZ = z => MMOZ + z * MMS;
+// an enemy you lose sight of leaves a fading "?" where you last saw them, cleared on death and each new round
+const LAST_SEEN = 8;
+function markSeen(e) { e.seenX = e.pos.x; e.seenZ = e.pos.z; e.seenT = performance.now() / 1000; e.seenR = G.round; }
+function drawLastSeen(g, e, x, y) {
+  const age = performance.now() / 1000 - e.seenT;
+  if (!e.seenT || e.seenR !== G.round || age > LAST_SEEN) return;
+  g.globalAlpha = Math.min(1, (LAST_SEEN - age) / 2) * .85;
+  g.strokeStyle = g.fillStyle = '#ff4b5c'; g.lineWidth = 1.5;
+  g.beginPath(); g.arc(x, y, 4.5, 0, TAU); g.stroke();
+  g.font = '700 8px "Chakra Petch", sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('?', x, y + .5);
+  g.globalAlpha = 1; g.textBaseline = 'alphabetic';
+}
 function drawMinimap() {
   const g = mmx; g.setTransform(dpr, 0, 0, dpr, 0, 0);
   g.clearRect(0, 0, mmW, mmH); g.drawImage(mmBase, 0, 0, mmW, mmH);
   for (const d of G.drops) { g.fillStyle = '#f2c94c'; g.fillRect(MX(d.x) - 2, MZ(d.z) - 2, 4, 4); }
   const ce = camera.position, f = aimDir(P.yaw, 0);
   for (const pl of players.values()) {
-    if (pl === ME || !pl.alive) continue;
+    if (pl === ME) continue;
+    if (!pl.alive) { pl.seenT = 0; continue; }
     const ally = pl.team === ME.team;
     const dx = pl.pos.x - ce.x, dz = pl.pos.z - ce.z, d = Math.hypot(dx, dz) || 1;
     // teammates always show; enemies only while you can actually see them
     const vis = ally || (P.alive && (dx * f.x + dz * f.z) / d > .5 && losClear(ce.x, ce.y, ce.z, pl.pos.x, 1.3, pl.pos.z));
-    if (!vis) continue;
+    if (!vis) { drawLastSeen(g, pl, MX(pl.seenX), MZ(pl.seenZ)); continue; }
+    if (!ally) markSeen(pl);
     g.fillStyle = ally ? '#45e0c3' : '#ff4b5c'; g.beginPath(); g.arc(MX(pl.pos.x), MZ(pl.pos.z), 3.2, 0, TAU); g.fill();
   }
   if (ME) {
