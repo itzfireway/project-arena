@@ -1867,7 +1867,7 @@ function useBladeStorm() {
 }
 function endBladeStorm() {
   delete P.slots.ult;
-  if (P.cur === 'ult') { P.cur = P.slots[P.prevSlot] ? P.prevSlot : 'secondary'; P.switchT = .45; VM.set(P.slots[P.cur].id); }
+  if (P.cur === 'ult') { P.cur = P.slots[P.prevSlot] ? P.prevSlot : ['primary', 'secondary', 'melee'].find(s => P.slots[s]); P.switchT = .45; VM.set(P.slots[P.cur].id); }
 }
 
 /* ---------- Run It Back ---------- */
@@ -3110,7 +3110,7 @@ function shopPick(id) {
   if (P.alive) {
     if (P.cur === 'ult') endBladeStorm();
     P.slots[slot] = id === 'none' ? null : newInst(id);
-    P.cur = P.slots[slot] ? slot : P.slots.primary ? 'primary' : 'secondary';
+    P.cur = P.slots[slot] ? slot : ['primary', 'secondary', 'melee'].find(s => P.slots[s]);
     P.reloadT = 0; P.spray = 0; P.inspect = 0; P.zoom = 1; setFov(1, 1);
     P.switchT = .35; VM.set(P.slots[P.cur].id); SFX.switch();
   }
