@@ -612,9 +612,32 @@ camera.rotation.order = 'YXZ';
 scene.add(camera);
 const vmScene = new THREE.Scene();
 const vmCam = new THREE.PerspectiveCamera(58, innerWidth / innerHeight, 0.01, 10);
-vmScene.add(new THREE.AmbientLight(0xffffff, .55));
+vmScene.add(new THREE.AmbientLight(0xffffff, .3));
 const vmSun = new THREE.DirectionalLight(0xfff0dc, 1.1); vmSun.position.set(1, 2, 1); vmScene.add(vmSun);
 const vmFill = new THREE.DirectionalLight(0x6fc8d0, .5); vmFill.position.set(-2, -.5, .5); vmScene.add(vmFill);
+const vmRim = new THREE.DirectionalLight(0xffe2c0, .8); vmRim.position.set(-.6, .9, -2); vmScene.add(vmRim);   // rakes the top edges from downrange
+// A little studio for the guns to reflect: warm sky over a dark floor, plus three softboxes. Metal with nothing
+// to mirror renders as flat grey however high its metalness goes, which is most of why the guns read as boxes.
+const GUN_ENV = (() => {
+  const s = new THREE.Scene(), geo = new THREE.SphereGeometry(10, 32, 16), p = geo.attributes.position, col = [];
+  const top = new THREE.Color(.18, .2, .24), hor = new THREE.Color(.32, .27, .22), floor = new THREE.Color(.03, .03, .035), c = new THREE.Color();
+  for (let i = 0; i < p.count; i++) {
+    const y = p.getY(i) / 10;
+    if (y >= 0) c.copy(hor).lerp(top, Math.sqrt(y)); else c.copy(hor).lerp(floor, Math.min(1, -y * 4));
+    col.push(c.r, c.g, c.b);
+  }
+  geo.setAttribute('color', new THREE.Float32BufferAttribute(col, 3));
+  s.add(new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ vertexColors: true, side: THREE.BackSide })));
+  const box = (w, h, r, g, b, x, y, z) => {
+    const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ side: THREE.DoubleSide }));
+    m.material.color.setRGB(r, g, b); m.position.set(x, y, z); m.lookAt(0, 0, 0); s.add(m);
+  };
+  box(4, 1.5, 4, 3.8, 3.5, 2, 7, 2);        // key, overhead and to the right like the sun
+  box(1, 5, .2, 1, 1, -8, 0, 1);            // teal strip, matching the fill light
+  box(5, 1.5, 1.6, 1.2, .8, -1, 3, -8);     // warm panel downrange for the rim
+  const pm = new THREE.PMREMGenerator(renderer), t = pm.fromScene(s, .02).texture; pm.dispose();
+  return t;
+})();
 
 function canvasTex(size, draw, repeat = true) {
   const c = document.createElement('canvas'); c.width = c.height = size;
@@ -1009,7 +1032,6 @@ function updateFX(dt) {
 /* ================= players ================= */
 const botMat = {
   suit: new THREE.MeshStandardMaterial({ color: 0x2a2f3a, roughness: .75 }),
-  gun: new THREE.MeshStandardMaterial({ color: 0x1b1e23, roughness: .5, metalness: .4 }),
 };
 // your side reads teal, theirs reads red -- both sides see themselves as teal
 const teamMat = {
@@ -1075,7 +1097,7 @@ function makeBotMesh(ally) {
   bpart(head, .24, .07, .02, 0, .02, -.145, T.visor);
   bpart(body, .12, .48, .12, .31, 1.22, -.14, botMat.suit, O).rotation.x = -.9;
   bpart(body, .12, .48, .12, -.24, 1.22, -.2, botMat.suit, O).rotation.set(-1.25, -.5, 0);
-  const gun = bpart(body, .07, .11, .62, .12, 1.3, -.48, botMat.gun);
+  const gun = new THREE.Group(); gun.position.set(.12, 1.3, -.2); body.add(gun);   // filled with the weapon by setPlayerGun
   const flash = new THREE.Sprite(new THREE.SpriteMaterial({ map: TEX_FLASH, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false }));
   flash.scale.setScalar(.55); flash.position.set(.12, 1.32, -.86); flash.visible = false; body.add(flash);
   const halo = new THREE.Group(); halo.position.set(0, 1.67, 0); halo.add(new THREE.Mesh(haloGeo, haloMat));
@@ -1083,6 +1105,12 @@ function makeBotMesh(ally) {
   halo.visible = false; body.add(halo);
   scene.add(g);
   return { g, body, legL, legR, gun, flash, halo, orbs, bar: makeBar() };
+}
+// other players carry the same model you hold, scaled up a touch so it still reads from across the map
+function setPlayerGun(m, id) {
+  const w = worldGun(WEAPONS[id] ? id : 'pistol'); w.scale.setScalar(1.15);
+  m.gun.clear(); m.gun.add(w); m.gunId = id;
+  m.flash.position.z = m.gun.position.z + w.userData.mz * 1.15 - .05;
 }
 const isLow = e => !!e.low;
 function botBoxes(b) {
@@ -1189,6 +1217,7 @@ function updateRemotes(dt) {
     }
     const sw = Math.sin(pl.walk) * Math.min(1, pl.moving / 5) * .5;
     m.legL.rotation.x = sw; m.legR.rotation.x = -sw;
+    if (m.gunId !== pl.weapon) setPlayerGun(m, pl.weapon);
     m.gun.rotation.x = clamp(-pl.pitch, -.8, .8);
     pl.shotT = Math.max(0, pl.shotT - dt);
     m.flash.visible = pl.shotT > 0;
@@ -1988,23 +2017,19 @@ function updateAbilities(dt) {
 }
 
 /* ================= dropped guns ================= */
-const dropMat = {
-  body: new THREE.MeshStandardMaterial({ color: 0x23272e, roughness: .5, metalness: .5 }),
-  accent: new THREE.MeshStandardMaterial({ color: 0x3fb9a6, roughness: .4, metalness: .3, emissive: 0x0f3a34 }),
-};
+// the real gun model, laid on its side and centred on the spot it hovers over
 function makeDropMesh(id) {
-  const len = WEAPONS[id].slot === 'primary' ? .95 : .5, g = new THREE.Group();
-  addMesh(new THREE.BoxGeometry(.08, .12, len), dropMat.body, 0, 0, 0, true, false, g);
-  addMesh(new THREE.BoxGeometry(.09, .025, len * .45), dropMat.accent, 0, .07, -len * .12, false, false, g);
-  addMesh(new THREE.BoxGeometry(.06, .15, .08), dropMat.body, 0, -.08, len * .3, true, false, g).rotation.x = .35;
-  scene.add(g); return g;
+  const g = new THREE.Group(), m = worldGun(id);
+  m.rotation.z = Math.PI / 2; m.scale.setScalar(1.15); m.updateMatrixWorld(true);
+  m.position.sub(new THREE.Box3().setFromObject(m).getCenter(new V3()));
+  g.add(m); scene.add(g); return g;
 }
 function dropWeaponAt(inst, x, z, yaw) {
   const d = { id: inst.id, mag: inst.mag, reserve: inst.reserve, x, z, yaw, mesh: makeDropMesh(inst.id) };
   G.drops.push(d); return d;
 }
 function removeDrop(d) {
-  scene.remove(d.mesh); d.mesh.traverse(o => { if (o.geometry) o.geometry.dispose(); });
+  scene.remove(d.mesh);   // geometry is shared with every other copy of that gun, so it stays
   const i = G.drops.indexOf(d); if (i >= 0) G.drops.splice(i, 1);
 }
 function updateDrops() {
@@ -2054,17 +2079,47 @@ function dropOrPickup() {
 
 /* ================= viewmodel ================= */
 const vmMat = {
-  metal: new THREE.MeshStandardMaterial({ color: 0x353b44, roughness: .4, metalness: .35 }),
-  dark: new THREE.MeshStandardMaterial({ color: 0x191c21, roughness: .6, metalness: .15 }),
-  accent: new THREE.MeshStandardMaterial({ color: 0x3fb9a6, roughness: .4, metalness: .3, emissive: 0x0f3a34 }),
-  sleeve: new THREE.MeshStandardMaterial({ color: 0x353b4c, roughness: .85 }),
-  glove: new THREE.MeshStandardMaterial({ color: 0x2b3038, roughness: .7 }),   // lighter than the grips, or the hand vanishes into whatever it is holding
-  blade: new THREE.MeshStandardMaterial({ color: 0xd2dae1, roughness: .28, metalness: .3 }),
-  edge: new THREE.MeshStandardMaterial({ color: 0xf4f9fc, roughness: .12, metalness: .35, emissive: 0x1b2a33 }),
+  metal: new THREE.MeshStandardMaterial({ color: 0x454b54, roughness: .3, metalness: .85 }),          // anodised receiver
+  dark: new THREE.MeshStandardMaterial({ color: 0x0f1114, roughness: .5, metalness: .2, envMapIntensity: .5 }),  // polymer furniture
+  steel: new THREE.MeshStandardMaterial({ color: 0x8a9098, roughness: .22, metalness: 1 }),            // barrels, muzzles, pins
+  accent: new THREE.MeshStandardMaterial({ color: 0x3fb9a6, roughness: .3, metalness: .4, emissive: 0x0f3a34 }),
+  sleeve: new THREE.MeshStandardMaterial({ color: 0x353b4c, roughness: .85, envMapIntensity: .3 }),
+  glove: new THREE.MeshStandardMaterial({ color: 0x2b3038, roughness: .7, envMapIntensity: .3 }),   // lighter than the grips, or the hand vanishes into whatever it is holding
+  blade: new THREE.MeshStandardMaterial({ color: 0xd2dae1, roughness: .2, metalness: .9 }),
+  edge: new THREE.MeshStandardMaterial({ color: 0xf4f9fc, roughness: .1, metalness: .9, emissive: 0x1b2a33 }),
   brass: new THREE.MeshStandardMaterial({ color: 0xc79a4b, roughness: .3, metalness: .9 }),
 };
-function vb(g, mat, w, h, d, x, y, z, rx = 0, ry = 0, rz = 0) { const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat); m.position.set(x, y, z); m.rotation.set(rx, ry, rz); g.add(m); return m; }
-function vc(g, mat, r, len, x, y, z) { const m = new THREE.Mesh(new THREE.CylinderGeometry(r, r, len, 14), mat); m.rotation.x = Math.PI / 2; m.position.set(x, y, z); g.add(m); return m; }
+for (const m of Object.values(vmMat)) m.envMap = GUN_ENV;
+// Every box gets its edges chamfered: a hard-edged box has nothing for a highlight to run along, so it reads
+// as a toy block however good the material is. Geometry is cached by size because the guns repeat a lot of it.
+const VB_GEO = {};
+function vbGeo(w, h, d) {
+  const k = w + '|' + h + '|' + d;
+  if (VB_GEO[k]) return VB_GEO[k];
+  const r = Math.min(.006, Math.min(w, h, d) * .22);
+  if (r < .0018) return (VB_GEO[k] = new THREE.BoxGeometry(w, h, d));
+  const x = w / 2 - r, y = h / 2 - r, sh = new THREE.Shape();
+  sh.moveTo(-x, -y); sh.lineTo(x, -y); sh.lineTo(x, y); sh.lineTo(-x, y); sh.lineTo(-x, -y);
+  const geo = new THREE.ExtrudeGeometry(sh, { depth: d - 2 * r, bevelEnabled: true, bevelThickness: r, bevelSize: r, bevelSegments: 2, curveSegments: 1 });
+  geo.translate(0, 0, -(d - 2 * r) / 2);
+  return (VB_GEO[k] = geo);
+}
+function vb(g, mat, w, h, d, x, y, z, rx = 0, ry = 0, rz = 0) { const m = new THREE.Mesh(vbGeo(w, h, d), mat); m.position.set(x, y, z); m.rotation.set(rx, ry, rz); g.add(m); return m; }
+function vc(g, mat, r, len, x, y, z) { const m = new THREE.Mesh(new THREE.CylinderGeometry(r, r, len, 24), mat); m.rotation.x = Math.PI / 2; m.position.set(x, y, z); g.add(m); return m; }
+// a muzzle device: a steel can with a dark ring cut round it near each end so it doesn't read as one plain tube
+function vMuzzle(g, M, r, len, y, z) {
+  vc(g, M.steel, r, len, 0, y, z);
+  for (const f of [-.3, .3]) vc(g, M.dark, r * 1.04, len * .14, 0, y, z + f * len);
+  vc(g, M.dark, r * .55, .004, 0, y, z - len / 2 - .001);                 // the bore
+}
+// the left flank of a rifle, which is the side the camera sees: panel seam, selector, bolt release and the
+// pins through the lower receiver
+function vFlank(g, M, hw, y, z0, len) {
+  vb(g, M.dark, .004, .005, len, -hw, y + .018, z0 - len / 2);             // upper/lower seam
+  vb(g, M.steel, .006, .01, .028, -hw - .003, y - .012, z0 + .005, .5);    // selector lever
+  vb(g, M.dark, .005, .022, .016, -hw - .002, y - .002, z0 - .07);         // bolt release
+  for (const pz of [z0 + .03, z0 - .11]) vc(g, M.steel, .0045, .004, -hw - .001, y - .022, pz).rotation.set(0, 0, Math.PI / 2);  // pins
+}
 // ---- shared viewmodel parts -------------------------------------------------
 // Every gun is built from the same vocabulary -- receiver, handguard, trigger group, iron sights and the
 // teal rail strip -- so the set reads as one armoury rather than seven unrelated piles of boxes.
@@ -2089,6 +2144,7 @@ function vMag(g, M, x, y, z, w, h, d, tilt) {
   vb(p, M.dark, w, h, d, 0, 0, 0);
   vb(p, M.metal, w + .004, .008, d + .004, 0, -h / 2 + .004, 0);   // floorplate
   vb(p, M.accent, w + .002, .006, .012, 0, h * .18, -d / 2);       // witness window
+  for (const f of [-.22, .22]) vb(p, M.metal, w + .003, h * .62, .006, 0, -h * .06, f * d);   // stiffening ribs
   return p;
 }
 function vGuard(g, M, z, d, y) {
@@ -2110,7 +2166,7 @@ function vFist(g, M, at, roll) {
   vb(cl, M.glove, .019, .052, .036, .026, -.012, .012, 0, 0, .22);                          // thumb along the grip
   return { f, cl };
 }
-function buildGun(id) {
+function buildGun(id, arms = true) {
   const g = new THREE.Group(), M = vmMat; let mz = -.5, rifle = true, hz = -.42, kara = null;
   switch (id) {
     case 'pistol': {
@@ -2119,7 +2175,10 @@ function buildGun(id) {
       vSerr(g, M, 5, .044, .03, .034, .002, .015);                       // cocking serrations
       vb(g, M.dark, .013, .024, .055, .022, .04, -.05);                  // ejection port
       vb(g, M.metal, .038, .034, .2, 0, -.002, -.085);                   // frame and dust cover
-      vc(g, M.dark, .0085, .05, 0, .034, -.212);                         // crowned muzzle
+      vc(g, M.steel, .0085, .05, 0, .034, -.212);                        // crowned muzzle
+      vc(g, M.dark, .0055, .003, 0, .034, -.238);                        // bore
+      vb(g, M.steel, .005, .012, .022, -.022, .004, -.03);               // slide stop
+      for (let i = 0; i < 3; i++) vb(g, M.dark, .04, .004, .006, 0, -.021, -.13 - i * .016);  // accessory rail slots
       vGuard(g, M, .012, .04, -.002);
       vGrip(g, M, 0, -.072, .02, .115, .26);
       vb(g, M.accent, .046, .008, .05, 0, .064, -.08);                   // rail strip
@@ -2131,7 +2190,8 @@ function buildGun(id) {
       vb(g, M.metal, .046, .013, .17, 0, .054, -.095);                   // top strap
       vc(g, M.metal, .0365, .085, 0, .024, -.055);                       // cylinder, lighter than the frame so its round face reads
       for (let i = 0; i < 6; i++) { const a = i * Math.PI / 3; vb(g, M.dark, .011, .011, .09, Math.cos(a) * .032, .024 + Math.sin(a) * .032, -.055); }  // flutes
-      vc(g, M.metal, .015, .24, 0, .038, -.21);                          // barrel
+      vc(g, M.steel, .015, .24, 0, .038, -.21);                          // barrel
+      vc(g, M.dark, .009, .003, 0, .038, -.331);                         // bore
       vb(g, M.metal, .026, .022, .2, 0, .018, -.2);                      // ejector rod shroud
       vb(g, M.dark, .011, .022, .024, 0, .061, -.018);                   // hammer spur
       vb(g, M.metal, .032, .055, .026, 0, -.012, .022);                  // backstrap into the grip
@@ -2145,8 +2205,9 @@ function buildGun(id) {
       vb(g, M.dark, .06, .022, .3, 0, .05, -.1);                         // top cover
       vb(g, M.dark, .05, .054, .17, 0, -.008, -.31);                     // handguard
       for (let i = 0; i < 3; i++) for (const s of [-1, 1]) vb(g, M.metal, .006, .018, .02, s * .027, -.008, -.27 - i * .035);  // cooling slots
-      vc(g, M.dark, .013, .1, 0, .006, -.4);                             // barrel
-      vc(g, M.metal, .018, .03, 0, .006, -.432);                         // flash hider
+      vc(g, M.steel, .013, .1, 0, .006, -.4);                            // barrel
+      vMuzzle(g, M, .018, .034, .006, -.432);                            // flash hider
+      vFlank(g, M, .028, .004, .02, .2);
       vb(g, M.dark, .03, .042, .08, 0, .004, .08);                       // buffer housing
       vb(g, M.metal, .013, .05, .15, 0, .012, .145);                     // folding stock strut
       vb(g, M.dark, .05, .056, .022, 0, .002, .222);                     // stock pad
@@ -2164,8 +2225,9 @@ function buildGun(id) {
       vb(g, M.dark, .05, .058, .26, 0, -.004, -.52);                     // handguard
       for (let i = 0; i < 4; i++) for (const s of [-1, 1]) vb(g, M.metal, .006, .02, .022, s * .027, -.004, -.44 - i * .038);  // vents
       vb(g, M.metal, .03, .034, .05, 0, .01, -.665);                     // gas block
-      vc(g, M.dark, .011, .11, 0, .006, -.715);                          // barrel
-      vc(g, M.metal, .017, .035, 0, .006, -.783);                        // muzzle brake
+      vc(g, M.steel, .011, .11, 0, .006, -.715);                         // barrel
+      vMuzzle(g, M, .017, .04, .006, -.783);                             // muzzle brake
+      vFlank(g, M, .029, 0, .02, .3);
       vb(g, M.dark, .048, .07, .2, 0, -.005, .15);                       // stock
       vb(g, M.dark, .05, .03, .05, 0, .042, .1);                         // cheek rest
       vb(g, M.metal, .052, .062, .022, 0, -.01, .245);                   // butt pad
@@ -2182,8 +2244,9 @@ function buildGun(id) {
       vb(g, M.dark, .07, .026, .52, 0, .062, -.24);                      // top rail
       vb(g, M.dark, .058, .062, .3, 0, -.004, -.56);                     // handguard
       for (let i = 0; i < 5; i++) for (const s of [-1, 1]) vb(g, M.metal, .007, .024, .02, s * .031, -.004, -.45 - i * .04);  // vents
-      vc(g, M.dark, .015, .15, 0, .006, -.765);                          // heavy barrel
-      vc(g, M.metal, .023, .04, 0, .006, -.85);                          // brake
+      vc(g, M.steel, .015, .15, 0, .006, -.765);                         // heavy barrel
+      vMuzzle(g, M, .023, .05, .006, -.85);                              // brake
+      vFlank(g, M, .033, 0, .02, .32);
       vb(g, M.dark, .054, .078, .22, 0, -.006, .16);                     // stock
       vb(g, M.metal, .058, .068, .024, 0, -.01, .268);                   // butt pad
       for (const s of [-1, 1]) vb(g, M.dark, .008, .04, .09, s * .023, -.046, -.6, .35);  // bipod, folded back
@@ -2205,8 +2268,9 @@ function buildGun(id) {
       vb(g, M.dark, .021, .022, .03, 0, .126, -.14);                     // elevation turret
       vb(g, M.dark, .03, .021, .022, .026, .096, -.14);                  // windage turret
       vb(g, M.metal, .03, .03, .06, 0, .004, -.32);                      // barrel shank
-      vc(g, M.dark, .013, .56, 0, .004, -.6);                            // barrel
-      vc(g, M.metal, .019, .05, 0, .004, -.9);                           // brake
+      vc(g, M.steel, .013, .56, 0, .004, -.6);                           // barrel
+      vMuzzle(g, M, .019, .05, .004, -.9);                               // brake
+      vc(g, M.accent, .029, .004, 0, .096, -.052);                       // ocular lens
       vb(g, M.dark, .015, .015, .05, .03, .022, -.02);                   // bolt body
       vb(g, M.metal, .012, .042, .012, .04, .002, -.006, 0, 0, .4);      // bolt handle
       vb(g, M.dark, .05, .075, .24, 0, -.01, .16);                       // stock
@@ -2263,6 +2327,7 @@ function buildGun(id) {
       kara = { kn, rest: kn.position.clone() }; mz = -.3; rifle = false; break;
     }
   }
+  if (!arms) return { g, mz };
   // the knife is held further forward than a gun grip, so its forearm comes in lower and wider
   if (kara) { vb(g, M.sleeve, .07, .07, .26, .085, -.185, .1, .5); Object.assign(kara, vFist(g, M, kara.rest, KN_REST)); }
   else { vb(g, M.sleeve, .085, .085, .32, .03, -.12, .19, .35); vb(g, M.glove, .07, .07, .08, 0, -.065, .02); }
@@ -2270,7 +2335,32 @@ function buildGun(id) {
   const muzzle = new THREE.Object3D(); muzzle.position.set(0, .03, mz); g.add(muzzle);
   const flash = new THREE.Sprite(new THREE.SpriteMaterial({ map: TEX_FLASH, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, depthTest: false }));
   flash.scale.setScalar(id === 'wraith' ? .08 : .2); flash.visible = false; muzzle.add(flash);
-  return { g, flash, kara };
+  return { g, flash, kara, mz };
+}
+// World copies of the viewmodel guns (dropped on the floor, in bots' hands): the same model without the arms,
+// merged into one mesh per material so a full lobby of armed bots costs a few dozen draw calls, not hundreds.
+const WORLD_GUN = {};
+function worldGun(id) {
+  if (!WORLD_GUN[id]) {
+    const { g, mz } = buildGun(id, false), byMat = new Map(), out = new THREE.Group();
+    g.updateMatrixWorld(true);
+    g.traverse(o => {
+      if (!o.isMesh) return;
+      const gm = (o.geometry.index ? o.geometry.toNonIndexed() : o.geometry.clone()).applyMatrix4(o.matrixWorld);
+      if (!byMat.has(o.material)) byMat.set(o.material, []);
+      byMat.get(o.material).push(gm);
+    });
+    for (const [mat, list] of byMat) {
+      const n = list.reduce((a, gm) => a + gm.attributes.position.count, 0), pos = new Float32Array(n * 3), nor = new Float32Array(n * 3);
+      let at = 0;
+      for (const gm of list) { pos.set(gm.attributes.position.array, at * 3); nor.set(gm.attributes.normal.array, at * 3); at += gm.attributes.position.count; gm.dispose(); }
+      const geo = new THREE.BufferGeometry();
+      geo.setAttribute('position', new THREE.BufferAttribute(pos, 3)); geo.setAttribute('normal', new THREE.BufferAttribute(nor, 3));
+      const m = new THREE.Mesh(geo, mat); m.castShadow = true; out.add(m);
+    }
+    out.userData.mz = mz; WORLD_GUN[id] = out;
+  }
+  const c = WORLD_GUN[id].clone(); c.userData.mz = WORLD_GUN[id].userData.mz; return c;
 }
 const VM = {
   root: new THREE.Group(), cur: null, id: null, kick: 0, flashT: 0, swing: 0, bob: 0, swayX: 0, swayY: 0, cache: {},
